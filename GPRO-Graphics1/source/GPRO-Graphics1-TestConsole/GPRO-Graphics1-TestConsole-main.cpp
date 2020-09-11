@@ -27,9 +27,11 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
-#include "gpro/gpro-math/gproVector.h"
-#include "gpro/colorr.h"
-#include "gpro/rayClass.h"
+
+#include "gpro/gpro-math/mathConst.h"
+#include "gpro/color.h"
+#include "gpro/Hitter.h"
+#include "gpro/sphereClass.h"
 
 using namespace std;
 
@@ -73,6 +75,11 @@ int main(int const argc, char const* const argv[])
 {
 	testVector();
 
+	//World variables and constants
+	Hittable_List world;
+	world.add(make_shared<Sphere>(vec3(0, 0, -1), 0.5f));
+	world.add(make_shared<Sphere>(vec3(0, -100.5, -1), 100.0f));
+
 	//Camera variables
 	float viewport_height = 2.0f;
 	float viewport_width = 2.0f;
@@ -96,8 +103,8 @@ int main(int const argc, char const* const argv[])
 		{
 			float u = float(k) / (IMAGE_WIDTH - 1);
 			float v = float(i) / (IMAGE_HEIGHT - 1);
-			ray ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-			vec3 pixel_color = ray_color(ray);
+			Ray ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
+			vec3 pixel_color = ray_color(ray, world);
 			color_maker(file, pixel_color);
 
 			//Orignal implementation
