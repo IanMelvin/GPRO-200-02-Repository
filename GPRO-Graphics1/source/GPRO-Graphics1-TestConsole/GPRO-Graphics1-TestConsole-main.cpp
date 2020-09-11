@@ -29,14 +29,22 @@
 #include <fstream>
 #include "gpro/gpro-math/gproVector.h"
 #include "gpro/colorr.h"
+#include "gpro/rayClass.h"
 
 using namespace std;
 
 //Image constants
+const float aspect_ratio = 16.0f / 9.0f;
+const int IMAGE_WIDTH = 400;
+const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / aspect_ratio);
+
+
+//Original Constants
+/*
 const int IMAGE_WIDTH = 256;
 const int IMAGE_HEIGHT = 256;
 const float RGB_CONVERSION = 255.999f;
-
+*/
 
 void testVector()
 {
@@ -65,6 +73,16 @@ int main(int const argc, char const* const argv[])
 {
 	testVector();
 
+	//Camera variables
+	float viewport_height = 2.0f;
+	float viewport_width = 2.0f;
+	float focal_length = 1.0f;
+
+	vec3 origin = vec3(0, 0, 0);
+	vec3 horizontal = vec3(viewport_width, 0, 0);
+	vec3 vertical = vec3(0, viewport_height, 0);
+	vec3 lower_left_corner = origin - horizontal / 2 - vertical / 2 - vec3(0, 0, focal_length);
+
 	//Rendering
 	ofstream file("image.ppm");
 
@@ -76,7 +94,10 @@ int main(int const argc, char const* const argv[])
 
 		for (int k = 0; k < IMAGE_WIDTH; k++)
 		{
-			vec3 pixel_color(float(k) / (IMAGE_WIDTH - 1), float(i) / (IMAGE_HEIGHT - 1), 0.25);
+			float u = float(k) / (IMAGE_WIDTH - 1);
+			float v = float(i) / (IMAGE_HEIGHT - 1);
+			ray ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
+			vec3 pixel_color = ray_color(ray);
 			color_maker(file, pixel_color);
 
 			//Orignal implementation

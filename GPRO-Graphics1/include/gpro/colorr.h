@@ -11,13 +11,14 @@
 
 #include "gpro-math/gproVector.h"
 #include <iostream>
+#include <fstream>
 #include "rayClass.h"
 
 using namespace std;
 
 const float RGB_CONVERSION = 255.999f;
 
-void color_maker(ostream &out, vec3 pixel_color)
+void color_maker(ofstream &out, vec3 pixel_color)
 {
 	out << static_cast<int>(RGB_CONVERSION * pixel_color.getX()) << " "
 		<< static_cast<int>(RGB_CONVERSION * pixel_color.getY()) << " "
