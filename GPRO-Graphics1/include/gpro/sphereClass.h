@@ -17,7 +17,10 @@ using namespace std;
 
 class Sphere : public Hittable {
 public: 
-	Sphere() {}
+	Sphere()
+	{
+		
+	}
 	Sphere(vec3 center, float radius)
 	{
 		this->center = center;
@@ -27,7 +30,7 @@ public:
 	virtual bool hit(const Ray& ray, float temp_min, float temp_max, hit_record& record) const override;
 
 	vec3 center;
-	float radius;
+	float radius = 0.0f;
 };
 
 bool Sphere::hit(const Ray& ray, float temp_min, float temp_max, hit_record& record) const

@@ -32,6 +32,7 @@
 #include "gpro/color.h"
 #include "gpro/Hitter.h"
 #include "gpro/sphereClass.h"
+#include "gpro/cameraClass.h"
 
 using namespace std;
 
@@ -39,6 +40,7 @@ using namespace std;
 const float aspect_ratio = 16.0f / 9.0f;
 const int IMAGE_WIDTH = 400;
 const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / aspect_ratio);
+const int SAMPLES_PER_PIXEL = 100;
 
 
 //Original Constants
@@ -80,16 +82,9 @@ int main(int const argc, char const* const argv[])
 	world.add(make_shared<Sphere>(vec3(0, 0, -1), 0.5f));
 	world.add(make_shared<Sphere>(vec3(0, -100.5, -1), 100.0f));
 
-	//Camera variables
-	float viewport_height = 2.0f;
-	float viewport_width = 2.0f;
-	float focal_length = 1.0f;
-
-	vec3 origin = vec3(0, 0, 0);
-	vec3 horizontal = vec3(viewport_width, 0, 0);
-	vec3 vertical = vec3(0, viewport_height, 0);
-	vec3 lower_left_corner = origin - horizontal / 2 - vertical / 2 - vec3(0, 0, focal_length);
-
+	//Camera
+	Camera cam;
+	
 	//Rendering
 	ofstream file("image.ppm");
 
@@ -101,11 +96,17 @@ int main(int const argc, char const* const argv[])
 
 		for (int k = 0; k < IMAGE_WIDTH; k++)
 		{
-			float u = float(k) / (IMAGE_WIDTH - 1);
-			float v = float(i) / (IMAGE_HEIGHT - 1);
-			Ray ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-			vec3 pixel_color = ray_color(ray, world);
-			color_maker(file, pixel_color);
+			vec3 pixel_color(0, 0, 0);
+			for (int j = 0; j < SAMPLES_PER_PIXEL; j++)
+			{
+				float u = (k + rand_float()) / (IMAGE_WIDTH-1);
+				float v = (i + rand_float()) / (IMAGE_HEIGHT - 1);
+
+				Ray ray = cam.getRay(u, v);
+				pixel_color += ray_color(ray, world);
+			}
+
+			color_maker(file, pixel_color, SAMPLES_PER_PIXEL);
 
 			//Orignal implementation
 			/*

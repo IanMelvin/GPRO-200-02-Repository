@@ -18,8 +18,8 @@ using namespace std;
 struct hit_record {
 	vec3 point;
 	vec3 perpendicular;
-	float temp;
-	bool frontOrBack;
+	float temp = 0.0f;
+	bool frontOrBack = false;;
 
 	inline void set_face_normal(const Ray& ray, const vec3& outward_normal)
 	{

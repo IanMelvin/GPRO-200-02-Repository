@@ -21,13 +21,23 @@ using namespace std;
 
 
 //Math constant
-const float RGB_CONVERSION = 255.999f;
+const float RGB_CONVERSION = 256.0f;
 
-void color_maker(ofstream &out, vec3 pixel_color)
+void color_maker(ofstream &out, vec3 pixel_color, int samples_per_pixel)
 {
-	out << static_cast<int>(RGB_CONVERSION * pixel_color.getX()) << " "
-		<< static_cast<int>(RGB_CONVERSION * pixel_color.getY()) << " "
-		<< static_cast<int>(RGB_CONVERSION * pixel_color.getZ()) << endl;
+	float red = pixel_color.getX();
+	float green = pixel_color.getY();
+	float blue = pixel_color.getZ();
+
+	float scale = 1.0f / samples_per_pixel;
+
+	red *= scale;
+	green *= scale;
+	blue *= scale;
+
+	out << static_cast<int>(RGB_CONVERSION * clamp(red, 0.0f, 0.999f)) << " "
+		<< static_cast<int>(RGB_CONVERSION * clamp(green, 0.0f, 0.999f)) << " "
+		<< static_cast<int>(RGB_CONVERSION * clamp(blue, 0.0f, 0.999f)) << endl;
 }
 
 float hit_sphere(const vec3& center, float radius, const Ray& ray)
