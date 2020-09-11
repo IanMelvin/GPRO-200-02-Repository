@@ -22,6 +22,17 @@
 	Modified because: ____________
 */
 
+/*
+	Modified By Ian Melvin
+	File: GPRO-Graphics1-TestConsole-main.cpp
+	Purpose: The purpose of this file is run all the shaders
+
+	Contriubters:
+	Ian Melvin
+
+	Intial code provided by Daniel S. Buckstein
+*/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,19 +47,15 @@
 
 using namespace std;
 
-//Image constants
+	/*
+		Implemented by Ian Melin
+		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+		Description: Declaration of constant variables. 
+	*/
 const float aspect_ratio = 16.0f / 9.0f;
 const int IMAGE_WIDTH = 400;
 const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / aspect_ratio);
 const int SAMPLES_PER_PIXEL = 100;
-
-
-//Original Constants
-/*
-const int IMAGE_WIDTH = 256;
-const int IMAGE_HEIGHT = 256;
-const float RGB_CONVERSION = 255.999f;
-*/
 
 void testVector()
 {
@@ -72,22 +79,46 @@ void testVector()
 #endif	// __cplusplus
 }
 
-
+	/*
+		Modified by Ian Melin
+		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+		Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+		Function Type: main program function
+		Description: Declares values for program and runs the inital code to start the process. 
+	*/
 int main(int const argc, char const* const argv[])
 {
+	//Daniel S. Buckstein's
 	testVector();
 
-	//World variables and constants
+	/*
+		Implemented by Ian Melin
+		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+		Description: Declaration of objects to be shaded
+	*/
 	Hittable_List world;
-	world.add(make_shared<Sphere>(vec3(0, 0, -1), 0.5f));
-	world.add(make_shared<Sphere>(vec3(0, -100.5, -1), 100.0f));
+	world.add(make_shared<Sphere>(vec3(0, 0, -1), 0.5f)); //main rainbow sphere
+	world.add(make_shared<Sphere>(vec3(0, -100.5, -1), 100.0f)); //ground sphere
 
-	//Camera
+	/*
+		Implemented by Ian Melin
+		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+		Description: Declares instance of camera
+	*/
 	Camera cam;
 	
-	//Rendering
+	/*
+		Implemented by Ian Melin
+		Description: Opens output file stream for pixel values to be sent and turned into the outputed image
+	*/
 	ofstream file("image.ppm");
 
+	/*
+		Implemented by Ian Melin
+		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+		Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+		Description: Outputing inital values to file, then goes through each pixel and calculates what the rgb value of each pixel is through calling functions
+	*/
 	file << "P3" << endl << IMAGE_WIDTH << " " << IMAGE_HEIGHT << endl << "255" << endl;
 
 	for (int i = IMAGE_HEIGHT-1; i >= 0; i--)
@@ -108,18 +139,6 @@ int main(int const argc, char const* const argv[])
 
 			color_maker(file, pixel_color, SAMPLES_PER_PIXEL);
 
-			//Orignal implementation
-			/*
-			float red = float(k) / (IMAGE_WIDTH-1);
-			float green = float(i) / (IMAGE_HEIGHT-1);
-			float blue = 0.25;
-
-			int intRed = static_cast<int>(RGB_CONVERSION * red);
-			int intGreen = static_cast<int>(RGB_CONVERSION * green);
-			int intBlue = static_cast<int>(RGB_CONVERSION * blue);
-
-			file << intRed << " " << intGreen << " " << intBlue << endl;
-			*/
 		}
 
 
@@ -127,7 +146,15 @@ int main(int const argc, char const* const argv[])
 	}
 
 	cerr << endl << "Done!" << endl;
+	
+	/*
+		Implemented by Ian Melin
+		Description: Closes FileStream
+	*/
+	file.close();
 
+
+	//Daniel S. Buckstein's
 	printf("\n\n");
 	system("pause");
 }

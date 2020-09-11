@@ -22,6 +22,17 @@
 	Modified because: ____________
 */
 
+/*
+	Modified By Ian Melvin
+	File: gproVector.inl
+	Purpose: The purpose of the file is to implement functions related to the vec3 data type
+
+	Contriubters:
+	Ian Melvin
+
+	Intial code provided by Daniel S. Buckstein
+*/
+
 #ifdef _GPRO_VECTOR_H_
 #ifndef _GPRO_VECTOR_INL_
 #define _GPRO_VECTOR_INL_
@@ -69,37 +80,73 @@ inline vec3 const vec3::operator +(vec3 const& rh) const
 	return vec3((x + rh.x), (y + rh.y), (z + rh.z));
 }
 
-//Ian's Additions
+/*
+  Implemented by Ian Melin
+  Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+  Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+  Function type: inline vec3 returning function
+  Description: Overriding the multiplication operator between a float variable and a vec3 data type by multipling each component of vec3 with the float and returns the new vec3
+*/
 inline vec3 operator*(float t, const vec3 &vector)
 {
 	return vec3(t * vector.getX(), t * vector.getY(), t * vector.getZ());
 }
 
-inline vec3 operator*(const vec3 &vector, float t)
-{
-	return t * vector;
-}
-
+/*
+  Implemented by Ian Melin
+  Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+  Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+  Function type: inline vec3 returning function
+  Description: Overriding the multiplication operator between two vec3 by multipling the parallel conponents (v1.x * v2.x, etc), and returns the new vec3
+*/
 inline vec3 operator*(const vec3 &vector1, const vec3 &vector2)
 {
 	return vec3(vector1.getX() * vector2.getX(), vector1.getY() * vector2.getY(), vector1.getZ() * vector2.getZ());
 }
 
+/*
+  Implemented by Ian Melin
+  Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+  Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+  Function type: inline vec3 returning function
+  Description: Overriding the division operator between a float variable and a vec3 data type by multipling the vec3 by one over the float
+*/
 inline vec3 operator/ (vec3 vector, float t)
 {
 	return (1 / t) * vector;
 }
 
+/*
+  Implemented by Ian Melin
+  Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+  Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+  Function type: inline vec3 returning function
+  Description: Overriding the subtraction operator between two vectors by subtracting the parallel components (v1.x * v2.x, etc), and returns the new vec3
+*/
 inline vec3 operator-(const vec3 &vector1, const vec3 &vector2)
 {
 	return vec3(vector1.getX() - vector2.getX(), vector1.getY() - vector2.getY(), vector1.getZ() - vector2.getZ());
 }
 
+/*
+  Implemented by Ian Melin
+  Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+  Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+  Function type: inline vec3 returning function
+  Description: Takes in two vectiors, mutliplying each parallel component (v1.x * v2.x, etc), then returning the sum of the multiplied components
+*/
 inline float dot(const vec3 &vector1, const vec3 &vector2)
 {
 	return (vector1.getX() * vector2.getX()) + (vector1.getY() * vector2.getY()) + (vector1.getZ() * vector2.getZ());
 }
 
+/*
+  Implemented by Ian Melin
+  Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+  Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+  Function type: inline vec3 returning function
+  Description: Takes in a vec3 and divides the vec3 by the squareroot of the length of the vector, to get a vec3 of length 1
+*/
 inline vec3 unit_vector(vec3 vector)
 {
 	return vector / vector.length(true);

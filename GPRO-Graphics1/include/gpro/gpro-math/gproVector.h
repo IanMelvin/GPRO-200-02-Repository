@@ -22,6 +22,17 @@
 	Modified because: ____________
 */
 
+/*
+	Modified By Ian Melvin
+	File: gproVector.h
+	Purpose: The purpose of this file is to declare, and implemtent smaller, functions for the vec3 data type
+
+	Contriubters:
+	Ian Melvin
+
+	Intial code provided by Daniel S. Buckstein
+*/
+
 #ifndef _GPRO_VECTOR_H_
 #define _GPRO_VECTOR_H_
 
@@ -76,20 +87,49 @@ union vec3
 
 	vec3 const operator +(vec3 const& rh) const;	// addition operator (get sum of this and another)
 
-	//Ian's Additions
-	
+	/*
+		Implemented by Ian Melin
+		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+		Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+		Function type: Float returning Function
+		Description: Returns the x component of the vec3 data type
+	*/
 	float getX() const
 	{
 		return x;
 	}
+
+	/*
+	  Implemented by Ian Melin
+	  Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+	  Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+	  Function type: Float returning Function
+	  Description: Returns the y component of the vec3 data type
+	*/
 	float getY() const
 	{
 		return y;
 	}
+
+	/*
+	  Implemented by Ian Melin
+	  Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+	  Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+	  Function type: Float returning Function
+	  Description: Returns the z component of the vec3 data type
+	*/
 	float getZ() const
 	{
 		return z;
 	}
+
+	/*
+	  Implemented by Ian Melin
+	  Inspired by code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+	  Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+	  Function type: Float returning Function
+	  Description: Takes in a boolean, calculates the length of the vec3 before it is squarerooted, checks to see if the call wants the length(true) or the length squared(false)
+	*/
 	float length(bool root) const
 	{
 		float temp = x*x + y*y + z*z;
@@ -99,6 +139,14 @@ union vec3
 		}
 		return temp;
 	}
+
+	/*
+	  Implemented by Ian Melin
+	  Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+	  Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+	  Function type: vec3 returning function
+	  Description: Overloads the - operator by multipling each component of the vec3 by -1
+	*/
 	vec3 operator-() const
 	{
 		return vec3(-x, -y, -z);	

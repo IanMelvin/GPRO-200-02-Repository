@@ -1,11 +1,12 @@
 #pragma once
 /*
-	color.h
-	Functions related to managing the color output for the image
+	Writen By Ian Melvin
+	File: color.h
+	Purpose: The purpose of this file implement functions related to pixel color
 
-	Writen by Ian Melvin
+	Contriubters:
+	Ian Melvin
 */
-
 #ifndef COLOR_H
 #define COLOR_H
 
@@ -23,6 +24,13 @@ using namespace std;
 //Math constant
 const float RGB_CONVERSION = 256.0f;
 
+	/*
+		Implemented by Ian Melin
+		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+		Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+		Function Type: void function
+		Description: Takes in an file output stream, a vec3 and an integer. Calculates the rgb values and outputs them to the .ppm file for the shader to work 
+	*/
 void color_maker(ofstream &out, vec3 pixel_color, int samples_per_pixel)
 {
 	float red = pixel_color.getX();
@@ -40,23 +48,13 @@ void color_maker(ofstream &out, vec3 pixel_color, int samples_per_pixel)
 		<< static_cast<int>(RGB_CONVERSION * clamp(blue, 0.0f, 0.999f)) << endl;
 }
 
-float hit_sphere(const vec3& center, float radius, const Ray& ray)
-{
-	vec3 oc = ray.getOrigin() - center;
-	float temp1 = ray.getDirection().length(false);
-	float temp2 = dot(oc, ray.getDirection());
-	float temp3 = oc.length(false) - radius*radius;
-	float discriminant = temp2 * temp2 - temp1 * temp3;
-	if (discriminant < 0)
-	{
-		return -1.0f;
-	}
-	else
-	{
-		return (-temp2 - sqrt(discriminant)) / temp1;
-	}
-}
-
+/*
+		Implemented by Ian Melin
+		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+		Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+		Function Type: void function
+		Description: Empties vector of all instances of object stored in the vector
+	*/
 vec3 ray_color(const Ray& ray, const Hittable& world)
 {
 	hit_record record;
