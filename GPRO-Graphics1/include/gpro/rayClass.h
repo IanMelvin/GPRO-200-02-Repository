@@ -1,7 +1,7 @@
 #pragma once
 /*
 	colorr.h
-	Determine and output RGB values for pixels
+	Hold the Class and basic function implementation for ray objects
 
 	Writen by Ian Melvin
 */
@@ -11,10 +11,12 @@
 
 #include "gpro-math/gproVector.h"
 
-class ray {
+using namespace std;
+
+class Ray {
 public:
-	ray() {}
-	ray(const vec3& origin, const vec3& direction)
+	Ray() {}
+	Ray(const vec3& origin, const vec3& direction)
 	{
 		this->origin = origin;
 		this->direction = direction;
