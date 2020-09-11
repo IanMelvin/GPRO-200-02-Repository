@@ -132,6 +132,7 @@ bool Hittable_List::hit(const Ray& ray, float temp_min, float temp_max, hit_reco
 {
 	hit_record temp_record;
 	bool hit_anything = false;
+	int value = 0;
 	float closest = temp_max;
 
 	for (int i = 0; i < objects.size(); i++) 

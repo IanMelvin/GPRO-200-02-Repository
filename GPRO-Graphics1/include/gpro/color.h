@@ -13,6 +13,7 @@
 #include "gpro-math/gproVector.h"
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #include "gpro/gpro-math/mathConst.h"
 #include "Hitter.h"
@@ -48,6 +49,8 @@ void color_maker(ofstream &out, vec3 pixel_color, int samples_per_pixel)
 		<< static_cast<int>(RGB_CONVERSION * clamp(blue, 0.0f, 0.999f)) << endl;
 }
 
+
+
 /*
 		Implemented by Ian Melin
 		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
@@ -60,25 +63,12 @@ vec3 ray_color(const Ray& ray, const Hittable& world)
 	hit_record record;
 	if (world.hit(ray, 0, INFINITE_NUMBER, record))
 	{
-		return 0.5f * (record.perpendicular + vec3(1,1,1));
+		return 0.5 * (record.perpendicular + vec3(1, 1, 1));
 	}
+
 	vec3 unit_direction = unit_vector(ray.getDirection());
 	float temp = 0.5f * (unit_direction.getY() + 1.0f);
 	return (1.0f - temp) * vec3(1.0f, 1.0f, 1.0f) + temp * vec3(0.5f, 0.7f, 1.0f);
-
-	//Old version of ray_color
-	/*
-	float temp = hit_sphere(vec3(0, 0, -1), 0.5, ray);
-	if (temp > 0.0)
-	{
-		vec3 N = unit_vector(ray.location(temp) - vec3(0, 0, -1));
-		return 0.5f * vec3(N.getX() + 1, N.getY()+1, N.getZ()+1);
-	}
-
-	vec3 unit_direction = unit_vector(ray.getDirection());
-	temp = 0.5f * (unit_direction.getY() + 1.0f);
-	return (1.0f - temp) * vec3(1.0f, 1.0f, 1.0f) + temp * vec3(0.5f, 0.7f, 1.0f);
-	*/
 }
 
 

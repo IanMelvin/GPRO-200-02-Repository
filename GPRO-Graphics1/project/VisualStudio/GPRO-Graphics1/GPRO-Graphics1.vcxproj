@@ -165,6 +165,7 @@
     <ClInclude Include="..\..\..\include\gpro\Hitter.h" />
     <ClInclude Include="..\..\..\include\gpro\rayClass.h" />
     <ClInclude Include="..\..\..\include\gpro\sphereClass.h" />
+    <ClInclude Include="..\..\..\include\gpro\UI.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\gpro\gpro-math\_inl\gproVector.inl" />

@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #include "gpro/gpro-math/mathConst.h"
 #include "gpro/color.h"
@@ -45,7 +46,13 @@
 #include "gpro/sphereClass.h"
 #include "gpro/cameraClass.h"
 
+#include "gpro/UI.h"
+
 using namespace std;
+
+//vec3 constants foe color
+const vec3 EYE_MOUTH_COLOR(0, 0, 0);
+const vec3 FACE_COLOR(255, 255, 0);
 
 	/*
 		Implemented by Ian Melin
@@ -83,6 +90,7 @@ void testVector()
 		Modified by Ian Melin
 		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
 		Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+		
 		Function Type: main program function
 		Description: Declares values for program and runs the inital code to start the process. 
 	*/
@@ -93,67 +101,89 @@ int main(int const argc, char const* const argv[])
 
 	/*
 		Implemented by Ian Melin
-		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
-		Description: Declaration of objects to be shaded
+		Description: Call function for user input, get user input, determine results of user input
 	*/
-	Hittable_List world;
-	world.add(make_shared<Sphere>(vec3(0, 0, -1), 0.5f)); //main rainbow sphere
-	world.add(make_shared<Sphere>(vec3(0, -100.5, -1), 100.0f)); //ground sphere
+	int input = userInput();
 
-	/*
-		Implemented by Ian Melin
-		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
-		Description: Declares instance of camera
-	*/
-	Camera cam;
-	
-	/*
-		Implemented by Ian Melin
-		Description: Opens output file stream for pixel values to be sent and turned into the outputed image
-	*/
-	ofstream file("image.ppm");
-
-	/*
-		Implemented by Ian Melin
-		Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
-		Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
-		Description: Outputing inital values to file, then goes through each pixel and calculates what the rgb value of each pixel is through calling functions
-	*/
-	file << "P3" << endl << IMAGE_WIDTH << " " << IMAGE_HEIGHT << endl << "255" << endl;
-
-	for (int i = IMAGE_HEIGHT-1; i >= 0; i--)
+	if (input < 3)
 	{
-		cerr << "\rScanLines remaining: " << i << " " << flush;
+		//Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+		Hittable_List world;
 
-		for (int k = 0; k < IMAGE_WIDTH; k++)
+		if (input == 1)
 		{
-			vec3 pixel_color(0, 0, 0);
-			for (int j = 0; j < SAMPLES_PER_PIXEL; j++)
-			{
-				float u = (k + rand_float()) / (IMAGE_WIDTH-1);
-				float v = (i + rand_float()) / (IMAGE_HEIGHT - 1);
+			/*
+				Implemented by Ian Melin
+				Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+				Description: Declaration of objects to be shaded
+			*/
+			
+			world.add(make_shared<Sphere>(vec3(0, 0, -1), 0.5f)); //main rainbow sphere
+			world.add(make_shared<Sphere>(vec3(0, -100.5, -1), 100.0f)); //ground sphere
+		}
+		
+		else if (input == 2)
+		{
+			circleChooser(world);
+		}
+		
 
-				Ray ray = cam.getRay(u, v);
-				pixel_color += ray_color(ray, world);
+		/*
+			Implemented by Ian Melin
+			Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+			Description: Declares instance of camera
+		*/
+		Camera cam;
+
+		/*
+			Implemented by Ian Melin
+			Description: Opens output file stream for pixel values to be sent and turned into the outputed image
+		*/
+		ofstream file("image.ppm");
+
+		/*
+			Implemented by Ian Melin
+			Based on code provided by Peter Shirley in his book https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/alistofhittableobjects
+			Used components of The pre-existing framework by Daniel S. Buckstein https://github.com/dbucksteincc/GPRO-Graphics1
+			Description: Outputing inital values to file, then goes through each pixel and calculates what the rgb value of each pixel is through calling functions
+		*/
+		file << "P3" << endl << IMAGE_WIDTH << " " << IMAGE_HEIGHT << endl << "255" << endl;
+
+		for (int i = IMAGE_HEIGHT - 1; i >= 0; i--)
+		{
+			cerr << "\rScanLines remaining: " << i << " " << flush;
+
+			for (int k = 0; k < IMAGE_WIDTH; k++)
+			{
+				vec3 pixel_color(0, 0, 0);
+				for (int j = 0; j < SAMPLES_PER_PIXEL; j++)
+				{
+					float u = (k + rand_float()) / (IMAGE_WIDTH - 1);
+					float v = (i + rand_float()) / (IMAGE_HEIGHT - 1);
+
+					Ray ray = cam.getRay(u, v);
+					pixel_color += ray_color(ray, world);
+				}
+
+				color_maker(file, pixel_color, SAMPLES_PER_PIXEL);
+
 			}
 
-			color_maker(file, pixel_color, SAMPLES_PER_PIXEL);
+
 
 		}
 
+		cerr << endl << "Done!" << endl;
 
-		
+		/*
+			Implemented by Ian Melin
+			Description: Closes FileStream
+		*/
+		file.close();
+
+
 	}
-
-	cerr << endl << "Done!" << endl;
 	
-	/*
-		Implemented by Ian Melin
-		Description: Closes FileStream
-	*/
-	file.close();
-
-
 	//Daniel S. Buckstein's
 	printf("\n\n");
 	system("pause");

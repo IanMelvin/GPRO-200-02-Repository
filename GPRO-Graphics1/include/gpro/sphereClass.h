@@ -43,6 +43,7 @@ public:
 		this->center = center;
 		this->radius = radius;
 	}
+	
 
 	/*
 		Implemented by Ian Melin
@@ -52,8 +53,10 @@ public:
 	*/
 	virtual bool hit(const Ray& ray, float temp_min, float temp_max, hit_record& record) const override;
 
+
 	vec3 center;
 	float radius = 0.0f;
+
 };
 
 	/*
