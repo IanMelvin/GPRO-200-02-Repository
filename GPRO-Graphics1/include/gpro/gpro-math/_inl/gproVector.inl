@@ -75,9 +75,14 @@ inline vec3 operator*(float t, const vec3 &vector)
 	return vec3(t * vector.getX(), t * vector.getY(), t * vector.getZ());
 }
 
-inline vec3 operator*(const vec3& vector, float t)
+inline vec3 operator*(const vec3 &vector, float t)
 {
 	return t * vector;
+}
+
+inline vec3 operator*(const vec3 &vector1, const vec3 &vector2)
+{
+	return vec3(vector1.getX() * vector2.getX(), vector1.getY() * vector2.getY(), vector1.getZ() * vector2.getZ());
 }
 
 inline vec3 operator/ (vec3 vector, float t)
@@ -90,9 +95,14 @@ inline vec3 operator-(const vec3 &vector1, const vec3 &vector2)
 	return vec3(vector1.getX() - vector2.getX(), vector1.getY() - vector2.getY(), vector1.getZ() - vector2.getZ());
 }
 
+inline float dot(const vec3 &vector1, const vec3 &vector2)
+{
+	return (vector1.getX() * vector2.getX()) + (vector1.getY() * vector2.getY()) + (vector1.getZ() * vector2.getZ());
+}
+
 inline vec3 unit_vector(vec3 vector)
 {
-	return vector / vector.length();
+	return vector / vector.length(true);
 }
 
 #endif	// __cplusplus

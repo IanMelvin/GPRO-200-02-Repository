@@ -90,10 +90,15 @@ union vec3
 	{
 		return z;
 	}
-	float length() const
+	float length(bool root) const
 	{
 		float temp = x*x + y*y + z*z;
-		return sqrt(temp);
+		if (root)
+		{
+			return sqrt(temp);
+		}
+		return temp;
+		
 	}
 
 #endif	// __cplusplus
