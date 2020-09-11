@@ -76,6 +76,26 @@ union vec3
 
 	vec3 const operator +(vec3 const& rh) const;	// addition operator (get sum of this and another)
 
+	//Ian's Additions
+	
+	float getX() const
+	{
+		return x;
+	}
+	float getY() const
+	{
+		return y;
+	}
+	float getZ() const
+	{
+		return z;
+	}
+	float length() const
+	{
+		float temp = x*x + y*y + z*z;
+		return sqrt(temp);
+	}
+
 #endif	// __cplusplus
 };
 

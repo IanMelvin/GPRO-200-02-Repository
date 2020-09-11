@@ -25,9 +25,17 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-
+#include <iostream>
+#include <fstream>
 #include "gpro/gpro-math/gproVector.h"
+#include "gpro/colorr.h"
+
+using namespace std;
+
+//Image constants
+const int IMAGE_WIDTH = 256;
+const int IMAGE_HEIGHT = 256;
+const float RGB_CONVERSION = 255.999f;
 
 
 void testVector()
@@ -56,6 +64,40 @@ void testVector()
 int main(int const argc, char const* const argv[])
 {
 	testVector();
+
+	//Rendering
+	ofstream file("image.ppm");
+
+	file << "P3" << endl << IMAGE_WIDTH << " " << IMAGE_HEIGHT << endl << "255" << endl;
+
+	for (int i = IMAGE_HEIGHT-1; i >= 0; i--)
+	{
+		cerr << "\rScanLines remaining: " << i << " " << flush;
+
+		for (int k = 0; k < IMAGE_WIDTH; k++)
+		{
+			vec3 pixel_color(float(k) / (IMAGE_WIDTH - 1), float(i) / (IMAGE_HEIGHT - 1), 0.25);
+			color_maker(file, pixel_color);
+
+			//Orignal implementation
+			/*
+			float red = float(k) / (IMAGE_WIDTH-1);
+			float green = float(i) / (IMAGE_HEIGHT-1);
+			float blue = 0.25;
+
+			int intRed = static_cast<int>(RGB_CONVERSION * red);
+			int intGreen = static_cast<int>(RGB_CONVERSION * green);
+			int intBlue = static_cast<int>(RGB_CONVERSION * blue);
+
+			file << intRed << " " << intGreen << " " << intBlue << endl;
+			*/
+		}
+
+
+		
+	}
+
+	cerr << endl << "Done!" << endl;
 
 	printf("\n\n");
 	system("pause");

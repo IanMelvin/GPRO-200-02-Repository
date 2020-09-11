@@ -29,6 +29,8 @@
 
 #ifdef __cplusplus
 
+#include "gpro\gpro-math\gproVector.h"
+
 inline vec3::vec3()
 	: x(0.0f), y(0.0f), z(0.0f)
 {
@@ -67,6 +69,27 @@ inline vec3 const vec3::operator +(vec3 const& rh) const
 	return vec3((x + rh.x), (y + rh.y), (z + rh.z));
 }
 
+//Ian's Additions
+inline vec3 operator*(double t, const vec3 &vector)
+{
+	return vec3(t * vector.getX(), t * vector.getY(), t * vector.getZ());
+}
+
+inline vec3 operator*(const vec3& vector, float t)
+{
+	return t * vector;
+}
+
+inline vec3 operator/ (vec3 vector, float t)
+{
+	return (1 / t) * vector;
+}
+
+inline vec3 unit_vector(vec3 vector)
+{
+	return vector / vector.length();
+}
+
 #endif	// __cplusplus
 
 
@@ -102,6 +125,7 @@ inline floatv vec3sum(float3 v_sum, float3 const v_lh, float3 const v_rh)
 {
 	return vec3init(v_sum, (v_lh[0] + v_rh[0]), (v_lh[1] + v_rh[1]), (v_lh[2] + v_rh[2]));
 }
+
 
 
 #endif	// !_GPRO_VECTOR_INL_
