@@ -1,0 +1,29 @@
+/*
+	Ian Melvin
+	Effect 1
+	Purpose: To create a checkerboard
+
+*/
+
+
+//Takes in two Vec2 and determines where which color should go on screen
+vec4 grid(in vec2 fragCoord, in vec2 resolution)
+{
+    vec2 modRes = resolution / (1.0, 2.0);
+    
+    if(fragCoord.x < modRes.x)
+    {
+     	return vec4(0.0, 0.0, 0.0, 0.0); 
+    }
+    else if(fragCoord.x > modRes.x)
+    {
+        return vec4(1.0, 1.0, 1.0, 1.0);
+    }  
+}
+
+
+//Takes in a vec2 for a coordinates and outputes a color
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{  
+    fragColor = grid(fragCoord, iResolution.xy);
+}
