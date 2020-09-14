@@ -6,36 +6,36 @@
 */
 
 
-//Takes in two Vec2 and determines where which color should go on screen
-vec4 grid(in vec2 fragCoord, in vec2 resolution)
+//Takes in a vec2 and a float and calculates a 1 or 0 value based on the coordinates which determines what color is output for the pixel
+vec4 grid(in vec2 fragCoord, float size)
 {
-    vec2 position = floor(fragCoord / 5.0); //
+    //floor function:
+    //Learned of it's exisitance from https://www.shadertoy.com/view/lt2XWK
+    //Learned how it's work https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.60.pdf
+    //Returns float of closest int that is less then or equal to the parameter
+    vec2 position = floor(fragCoord / size);
     
-    float b = mod(position.x + position.y, 2.0);
+    //mod function:
+    //Learned of it's exisitance from https://www.shadertoy.com/view/lt2XWK
+    //Learned how it's work https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.60.pdf
+    //Returns the % of the input values, 1 or 0
+    float modulus = mod(position.x + position.y, 2.0);
     
-    return b * vec4(1.0, 1.0, 1.0, 1.0);
-    
-    /*
-    if(position.x % 2 == 0)
-    
-    vec2 modRes = resolution / (2.0, 2.0);
-    
-    if((fragCoord.x < modRes.x && fragCoord.y < modRes.y) || (fragCoord.x > modRes.x && fragCoord.y > modRes.y))
+    if (modulus == 0.0)
     {
-     	return vec4(0.0, 0.0, 0.0, 0.0); 
+        return vec4(1.0, 0.0, 0.5, 1.0);
     }
     else
     {
-        return vec4(1.0, 1.0, 1.0, 1.0);
-    }  
-    */
-    //return vec4(1.0, 0.0, 0.0, 1.0);
-    
+    	return vec4(0.5, 1.0, 1.0, 1.0);
+    }
 }
 
 
 //Takes in a vec2 for a coordinates and outputes a color
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {  
-    fragColor = grid(fragCoord, iResolution.xy);
+    float size = 20.0;
+    
+    fragColor = grid(fragCoord, size);
 }
