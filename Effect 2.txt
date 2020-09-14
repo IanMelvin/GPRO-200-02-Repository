@@ -6,12 +6,23 @@
 */
 
 
-//Takes in two vec2 and a float to calculate the distance between a point and the center, and make sure the value is within the circle
+//Takes in two vec2 and a float to calculate the distance between a point 
+//and the center, returns a color based on if the point is within the circle or not.
 vec4 circle(vec2 coord1, vec2 center, float radius)
 {
-    return vec4(1.0, 0.0, 0.5, 1.0);
+    //return vec4(1.0, 0.0, 0.5, 1.0);
     
-    //float leng = length(coord1 - center);
+    float leng = length(coord1 - center) - radius;
+    
+    if(leng <= 0.0)
+    {
+       return vec4(1.0, 1.0, 1.0, 1.0); 
+    }
+    else
+    {
+      return vec4(0.0, 0.0, 0.0, 0.0);   
+    }
+    
     //float clmp = clamp(leng, 0.0, 1.0);
     
 }
@@ -19,7 +30,7 @@ vec4 circle(vec2 coord1, vec2 center, float radius)
 //Takes in a vec2 for a coordinates and outputes a color
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {   
-    float radius = 5.0;
+    float radius = 100.0;
     vec2 center = iResolution.xy / 2.0;
     
     fragColor = circle(fragCoord, center, radius);
