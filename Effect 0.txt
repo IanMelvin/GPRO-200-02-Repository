@@ -7,10 +7,14 @@
 */
 
 //Takes in two vec2, calculates the Red and Green values of the returning color by dividing the coordinates with the screen resolution
-vec4 myEffect0(in vec2 fragCoord, in vec2 resolution)
+vec4 gradiant(in vec2 fragCoord, in vec2 resolution)
 {
     vec2 uv = fragCoord / resolution;
     return vec4(uv, 0.0, 1.0);
+    
+    //vec3 color = vec3(uv, 0.25);
+    //float alpha = 1.0;
+    // return vec4(color, alpha);
     
     //Old code exapmples/tests based off work shown by Dan Buckstein
     //return vec4(1.0, 0.0, 0.0, 1.0);
@@ -38,7 +42,7 @@ vec4 myEffect0(in vec2 fragCoord, in vec2 resolution)
 
 
 //calls function to determine the color of the pixels and returns them to the screen
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+void gradiant( out vec4 fragColor, in vec2 fragCoord )
 {
     fragColor = myEffect0(fragCoord, iResolution.xy);
     

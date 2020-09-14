@@ -6,9 +6,8 @@
 */
 
 
-//Takes in two vec2 and a float to calculate the distance between a point 
-//and the center, returns a color based on if the point is within the circle or not.
-vec4 circle(vec2 coord1, vec2 center, float radius)
+//Takes in two vec2 and a float to calculate the distance between a point and the center, and make sure the value is within the circle
+vec4 circle(vec2 coord1, vec2 center, float radius, vec3 color)
 {
     //return vec4(1.0, 0.0, 0.5, 1.0);
     
@@ -16,7 +15,8 @@ vec4 circle(vec2 coord1, vec2 center, float radius)
     
     if(leng <= 0.0)
     {
-       return vec4(1.0, 1.0, 1.0, 1.0); 
+       return vec4(color, 1.0);
+       //return vec4(1.0, 1.0, 1.0, 1.0); 
     }
     else
     {
@@ -32,6 +32,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {   
     float radius = 100.0;
     vec2 center = iResolution.xy / 2.0;
-    
-    fragColor = circle(fragCoord, center, radius);
+    vec3 color = 0.5 + 0.5*cos(iTime+vec3(0,2,4));
+
+    fragColor = circle(fragCoord, center, radius, color);
 }
