@@ -1,0 +1,14 @@
+/*
+	Ian Melvin
+	Effect 2
+	Purpose: Create a size changing circle 
+
+*/
+
+
+
+//Takes in a vec2 for a coordinates and outputes a color
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{   
+    fragColor = vec4(1.0,1.0,1.0,1.0);
+}
