@@ -9,6 +9,15 @@
 //Takes in two Vec2 and determines where which color should go on screen
 vec4 grid(in vec2 fragCoord, in vec2 resolution)
 {
+    vec2 position = floor(fragCoord / 5.0); //
+    
+    float b = mod(position.x + position.y, 2.0);
+    
+    return b * vec4(1.0, 1.0, 1.0, 1.0);
+    
+    /*
+    if(position.x % 2 == 0)
+    
     vec2 modRes = resolution / (2.0, 2.0);
     
     if((fragCoord.x < modRes.x && fragCoord.y < modRes.y) || (fragCoord.x > modRes.x && fragCoord.y > modRes.y))
@@ -19,8 +28,9 @@ vec4 grid(in vec2 fragCoord, in vec2 resolution)
     {
         return vec4(1.0, 1.0, 1.0, 1.0);
     }  
-    
+    */
     //return vec4(1.0, 0.0, 0.0, 1.0);
+    
 }
 
 
