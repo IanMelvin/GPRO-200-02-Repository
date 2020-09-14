@@ -5,10 +5,11 @@
 
 */
 
-vec3 color(bool inCircle)
+//Takes in a bool and a float, returns a vec3 corresponding to rgb
+vec3 color(bool inCircle, float time)
 {
-    vec3 color1 = 0.5 + 0.5*cos(iTime+vec3(0,2,4));
-    vec3 color2 = 0.5 + 0.5*cos(iTime-vec3(2.4,1.6,6));
+    vec3 color1 = 0.5 + 0.5*cos(time+vec3(0,2,4)); //based on the default code for each project on shadertoy.com
+    vec3 color2 = 0.5 + 0.5*cos(time-vec3(2.4,1.6,6)); //based on the default code for each project on shadertoy.com
     
     if(inCircle)
     {
@@ -21,32 +22,30 @@ vec3 color(bool inCircle)
 }
 
 
-//Takes in two vec2 and a float to calculate the distance between a point and the center, and make sure the value is within the circle
-vec4 circle(vec2 coord1, vec2 center, float radius)
+//Takes in two vec2 and a float to calculate the distance between a point and the center, 
+//and make sure the value is within the circle returns a vec4
+vec4 circle(vec2 coord1, vec2 center, float radius, float time)
 {
-    //return vec4(1.0, 0.0, 0.5, 1.0);
+    float newRad = mod(time/10.0, 5.0) * radius;
     
-    float leng = length(coord1 - center) - radius;
+    float leng = length(coord1 - center) - newRad; //Based on line 17 of "A Simple Circle" by jonobr1 https://www.shadertoy.com/view/XsjGDt
     
     if(leng <= 0.0)
     {
-       return vec4(color(true), 1.0);
+       return vec4(color(true, time), 1.0);
     }
     else
     {
-       return vec4(color(false), 1.0);   
+       return vec4(color(false, time), 1.0);   
     }
-    
-    //float clmp = clamp(leng, 0.0, 1.0);
-    
 }
 
 //Takes in a vec2 for a coordinates and outputes a color
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {   
-    float radius = 100.0;
+    float radius = 50.0;
     vec2 center = iResolution.xy / 2.0;
     
 
-    fragColor = circle(fragCoord, center, radius);
+    fragColor = circle(fragCoord, center, radius, iTime);
 }
