@@ -5,6 +5,14 @@
 
 */
 
+float waves(vec3 position, float time){
+    float flt = 0.0;
+
+    flt += length(sin(position+time));
+    flt = sin(flt * length(position.xy) + time) * 0.5 + 0.5;
+    return flt;
+}
+
 //Takes in a bool and a float, returns a vec3 corresponding to rgb
 vec3 colorLines(int inCircle, vec2 coord, float time, vec2 fragCoord)
 {
@@ -35,7 +43,7 @@ vec3 colorLines(int inCircle, vec2 coord, float time, vec2 fragCoord)
     	}
     	else
     	{
-    		return 0.5 + 0.5*cos(8.0*time+vec3(0,2,4));
+    		return 0.5 + 0.5*cos(8.0*time+vec3(1,3,2));
     	}
     }
     else
@@ -59,36 +67,79 @@ vec3 colorLines(int inCircle, vec2 coord, float time, vec2 fragCoord)
     }
 }
 
+float leng(float radius, float dist, float time)
+{
+    float len = 0.0;
+    
+    len = mod(time + 0.0, 5.0) * radius;
+    
+    len = length(dist) - len; //Based on line 17 of "A Simple Circle" by jonobr1 https://www.shadertoy.com/view/XsjGDt
+    
+    return len;
+}
+
 
 //Takes in two vec2 and a float to calculate the distance between a point and the center, 
 //and make sure the value is within the circle returns a vec4
-vec4 circle(vec2 coord1, vec2 center, float radius[6], float time)
+vec4 circle(vec2 coord1, vec2 center, float radius[7], float time)
 {
-    float newRad = mod(time, 5.0) * radius[5];
-    float newRad2 = mod(time, 5.0) * radius[4];
+    radius[6] = leng(radius[6], coord1-center, time);
     
-    float leng = length(coord1 - center) - newRad; //Based on line 17 of "A Simple Circle" by jonobr1 https://www.shadertoy.com/view/XsjGDt
-    float leng2 = length(coord1 - center) - newRad2; //Based on line 17 of "A Simple Circle" by jonobr1 https://www.shadertoy.com/view/XsjGDt
     
-    if(leng2 <= 0.0)
+    
+    if(radius[6] <= 0.0)
     {
-       return vec4(colorLines(2, coord1 - center, time, coord1), 1.0);
+       return vec4(colorLines(2, coord1 - center, time, coord1), time*1.0);
     }
-    if(leng <= 0.0)
+    else if(radius[5] <= 0.0)
     {
-       return vec4(colorLines(1, coord1 - center, time, coord1), 1.0);
+       return vec4(colorLines(1, coord1 - center, time, coord1), time*1.0);
+    }
+    else if(radius[4] <= 0.0)
+    {
+       return vec4(colorLines(2, coord1 - center, time, coord1), time*1.0);
+    }
+    else if(radius[3] <= 0.0)
+    {
+       return vec4(colorLines(1, coord1 - center, time, coord1), time*1.0);
+    }
+    else if(radius[2] <= 0.0)
+    {
+       return vec4(colorLines(2, coord1 - center, time, coord1), time*1.0);
+    }
+    else if(radius[1] <= 0.0)
+    {
+        return vec4(colorLines(1, coord1 - center, time, coord1), time*1.0);
+    }
+    else if(radius[0] <= 0.0)
+    {
+        return vec4(colorLines(2, coord1 - center, time, coord1), time*1.0);
     }
     else
     {
-       return vec4(colorLines(3, coord1 - center, time, coord1), 1.0);   
+       return vec4(colorLines(3, coord1 - center, time, coord1), time*1.0);   
     }
+    
 }
 
-//Takes in a vec2 for a set of coordinates and outputes a color
+//Takes in a vec2 for a coordinates and outputes a color
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {   
-    float radiusArray[6] = float[6](50.0, 25.0, 12.5, 6.25, 3.125, 1.5625);
-    vec2 center = iResolution.xy / 2.0;
+    float radiusArray[7] = float[7](40.0, 40.0, 30.0, 20.0, 15.0, 10.0, 5.0);
+    vec2 center = iMouse.xy;
     
-    fragColor = circle(fragCoord, center, radiusArray, iTime);
+    fragCoord.xy -= center;    
+	vec2 uv = fragCoord.xy / iResolution.x*20.0;
+    
+    
+    vec4 bkgcolor = vec4(1.0);
+    float f = 0.0;
+    float d = length(uv);
+    
+    for(float i = 0.0; i<6.0; i++){
+    	f += waves(vec3(uv.x,uv.y,i*0.7),iTime); 
+    }
+    bkgcolor.r = f;
+    bkgcolor.a =1.0;
+	fragColor = bkgcolor * circle(fragCoord, uv, radiusArray, iTime);
 }
