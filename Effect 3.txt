@@ -1,0 +1,94 @@
+/*
+	Ian Melvin
+	Effect 3
+	Purpose: Create a full screen psychedelic event
+
+*/
+
+//Takes in a bool and a float, returns a vec3 corresponding to rgb
+vec3 colorLines(int inCircle, vec2 coord, float time, vec2 fragCoord)
+{
+    float size = 20.0;
+    
+    if(inCircle == 1)
+	{
+        vec2 position = floor(coord / size);
+    	float modulus = mod(position.x + position.y, 2.0);
+    
+ 		if (modulus == 0.0)
+    	{
+       		return 0.5 + 0.5*cos(8.0*time+vec3(0,2,4));
+    	}
+    	else
+    	{
+    		return 0.5 + 0.5*cos(8.0*time-vec3(4,2,0));
+    	}
+    }
+    else if(inCircle == 2)
+	{
+        vec2 position = floor(coord / size);
+    	float modulus = mod(position.x + position.y, 2.0);
+    
+ 		if (modulus == 0.0)
+    	{
+            return 0.5 + 0.5*cos(8.0*time-vec3(2,3,1));
+    	}
+    	else
+    	{
+    		return 0.5 + 0.5*cos(8.0*time+vec3(0,2,4));
+    	}
+    }
+    else
+    {
+        vec2 position = floor(fragCoord / size);
+    	float modulus = mod(60.0, position.x + position.y);
+        float modulus2 = mod(60.0, position.x - position.y);
+    
+ 		if (modulus == 0.0)
+    	{
+       		return vec3(1.0, 0.0, 0.5);
+    	}
+        else if (modulus2 == 0.0)
+        {
+        	return vec3(.25, 0.9, 0.6);
+        }
+    	else
+    	{
+    		return 0.5 + 0.5*cos(time-vec3(2.4,1.6,6));
+    	}
+    }
+}
+
+
+//Takes in two vec2 and a float to calculate the distance between a point and the center, 
+//and make sure the value is within the circle returns a vec4
+vec4 circle(vec2 coord1, vec2 center, float radius[6], float time)
+{
+    float newRad = mod(time, 5.0) * radius[5];
+    float newRad2 = mod(time, 5.0) * radius[4];
+    
+    float leng = length(coord1 - center) - newRad; //Based on line 17 of "A Simple Circle" by jonobr1 https://www.shadertoy.com/view/XsjGDt
+    float leng2 = length(coord1 - center) - newRad2; //Based on line 17 of "A Simple Circle" by jonobr1 https://www.shadertoy.com/view/XsjGDt
+    
+    if(leng2 <= 0.0)
+    {
+       return vec4(colorLines(2, coord1 - center, time, coord1), 1.0);
+    }
+    if(leng <= 0.0)
+    {
+       return vec4(colorLines(1, coord1 - center, time, coord1), 1.0);
+    }
+    else
+    {
+       return vec4(colorLines(3, coord1 - center, time, coord1), 1.0);   
+    }
+}
+
+//Takes in a vec2 for a set of coordinates and outputes a color
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
+{   
+    float radiusArray[6] = float[6](50.0, 25.0, 12.5, 6.25, 3.125, 1.5625);
+    vec2 center = iResolution.xy / 2.0;
+    
+    fragColor = circle(fragCoord, center, radiusArray, iTime);
+}
