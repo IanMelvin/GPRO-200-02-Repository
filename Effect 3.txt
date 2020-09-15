@@ -5,6 +5,8 @@
 
 */
 
+//Based on the function at line 3 of "fluxfuzz" by netgrind https://www.shadertoy.com/view/4l2GRc
+//Takes in a vec3 and a float to break up the plusing waves into the background patterns
 float waves(vec3 position, float time){
     float flt = 0.0;
 
@@ -67,15 +69,14 @@ vec3 colorLines(int inCircle, vec2 coord, float time, vec2 fragCoord)
     }
 }
 
-float leng(float radius, float dist, float time)
+
+float newLength(vec2 dist, float radius, float time, float timeAdd, float modu)
 {
-    float len = 0.0;
+    float newLength = 0.0;
+    newLength = mod(time + timeAdd, modu) * radius;
+    newLength = length(dist) - newLength; //Based on line 17 of "A Simple Circle" by jonobr1 https://www.shadertoy.com/view/XsjGDt
     
-    len = mod(time + 0.0, 5.0) * radius;
-    
-    len = length(dist) - len; //Based on line 17 of "A Simple Circle" by jonobr1 https://www.shadertoy.com/view/XsjGDt
-    
-    return len;
+    return newLength;
 }
 
 
@@ -83,35 +84,41 @@ float leng(float radius, float dist, float time)
 //and make sure the value is within the circle returns a vec4
 vec4 circle(vec2 coord1, vec2 center, float radius[7], float time)
 {
-    radius[6] = leng(radius[6], coord1-center, time);
+    float leng = newLength(coord1, radius[6], time, 0.0, 5.0);
+    float leng2 = newLength(coord1, radius[5], time, 1.5, 5.0);
+    float leng3 = newLength(coord1, radius[4], time, 0.0, 5.0);
+    float leng4 = newLength(coord1, radius[3], time, 3.0, 4.0);
+    float leng5 = newLength(coord1, radius[2], time, 1.0, 6.0);
+    float leng6 = newLength(coord1, radius[1], time, 0.0, 5.0);
+    float leng7 = newLength(coord1, radius[0], time, 2.0, 8.0);
     
     
     
-    if(radius[6] <= 0.0)
+    if(leng <= 0.0)
     {
        return vec4(colorLines(2, coord1 - center, time, coord1), time*1.0);
     }
-    else if(radius[5] <= 0.0)
+    else if(leng2 <= 0.0)
     {
        return vec4(colorLines(1, coord1 - center, time, coord1), time*1.0);
     }
-    else if(radius[4] <= 0.0)
+    else if(leng3 <= 0.0)
     {
        return vec4(colorLines(2, coord1 - center, time, coord1), time*1.0);
     }
-    else if(radius[3] <= 0.0)
+    else if(leng4 <= 0.0)
     {
        return vec4(colorLines(1, coord1 - center, time, coord1), time*1.0);
     }
-    else if(radius[2] <= 0.0)
+    else if(leng5 <= 0.0)
     {
        return vec4(colorLines(2, coord1 - center, time, coord1), time*1.0);
     }
-    else if(radius[1] <= 0.0)
+    else if(leng6 <= 0.0)
     {
         return vec4(colorLines(1, coord1 - center, time, coord1), time*1.0);
     }
-    else if(radius[0] <= 0.0)
+    else if(leng7 <= 0.0)
     {
         return vec4(colorLines(2, coord1 - center, time, coord1), time*1.0);
     }
@@ -131,15 +138,15 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     fragCoord.xy -= center;    
 	vec2 uv = fragCoord.xy / iResolution.x*20.0;
     
-    
     vec4 bkgcolor = vec4(1.0);
-    float f = 0.0;
-    float d = length(uv);
+    float rgb = 0.0;
     
     for(float i = 0.0; i<6.0; i++){
-    	f += waves(vec3(uv.x,uv.y,i*0.7),iTime); 
+    	rgb += waves(vec3(uv.x,uv.y,i*0.7),iTime); 
     }
-    bkgcolor.r = f;
-    bkgcolor.a =1.0;
+    
+    bkgcolor.r = rgb;
+    bkgcolor.a = 1.0;
+    
 	fragColor = bkgcolor * circle(fragCoord, uv, radiusArray, iTime);
 }
