@@ -60,6 +60,32 @@ vec4 unit_vector(in vec4 vector)
  	   return vector/length(vector);
 }
 
+//Provided by Dan Buckstein during class
+//preforms the dot product on a vec3
+float lengthSquared(in vec3 x)
+{
+    return dot(x,x);
+}
+
+//Provided by Dan Buckstein during class
+//preforms the dot product on a vec4
+float lengthSquared(in vec4 x)
+{
+    return dot(x,x);
+}
+
+//Takes in a vec3, a float, and two vec4s and returns a true or false value
+bool hit_circle(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin)
+{
+    vec3 originToCenter =  rayOrigin.xyz - center;
+    float len2 = lengthSquared(rayDirection);
+    float component = 2.0 * dot(originToCenter, rayDirection.xyz);
+    float ocMinusRadSqred = lengthSquared(originToCenter) - radius*radius;
+    float discriminant = component*component - 4.0*len2*ocMinusRadSqred;
+    return (discriminant > 0.0);
+    
+}
+
 // Base Function by Dan Buckstein
 // Modified by Ian Melvin based on work by Peter Shirley (Link in header)
 // calcColor: calculate the color of a pixel given a ray
@@ -67,11 +93,16 @@ vec4 unit_vector(in vec4 vector)
 //    rayOrigin:    input ray origin
 vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
 {
+    if(hit_circle(vec3(0.0, 0.0, -1.0), 0.5, rayDirection, rayOrigin))
+    {
+     	return vec4(1.0, 0.0, 0.0, 1.0);   
+    }
+    
     vec4 unitDirection = unit_vector(rayDirection);
     
-    float t = 0.5 * (unitDirection.y + 1.0);
+    float blend = 0.5 * (unitDirection.y + 1.0);
    
-    return mix(vec4(1.0), vec4(0.5, 0.7, 1.0, 1.0), t);
+    return mix(vec4(1.0), vec4(0.5, 0.7, 1.0, 1.0), blend);
 }
 
 
