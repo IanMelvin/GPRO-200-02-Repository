@@ -60,6 +60,11 @@ vec4 unit_vector(in vec4 vector)
  	   return vector/length(vector);
 }
 
+vec3 unit_vector(in vec3 vector)
+{
+ 	   return vector/length(vector);
+}
+
 //Provided by Dan Buckstein during class
 //preforms the dot product on a vec3
 float lengthSquared(in vec3 x)
@@ -75,14 +80,21 @@ float lengthSquared(in vec4 x)
 }
 
 //Takes in a vec3, a float, and two vec4s and returns a true or false value
-bool hit_circle(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin)
+float hit_circle(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin)
 {
     vec3 originToCenter =  rayOrigin.xyz - center;
     float len2 = lengthSquared(rayDirection);
-    float component = 2.0 * dot(originToCenter, rayDirection.xyz);
+    float component = dot(originToCenter, rayDirection.xyz);
     float ocMinusRadSqred = lengthSquared(originToCenter) - radius*radius;
-    float discriminant = component*component - 4.0*len2*ocMinusRadSqred;
-    return (discriminant > 0.0);
+    float discriminant = component*component - len2*ocMinusRadSqred;
+    if(discriminant < 0.0)
+    {
+      return -1.0;
+    }
+    else
+    {
+      return (-component - sqrt(discriminant)) / (len2);
+    }
     
 }
 
@@ -93,18 +105,50 @@ bool hit_circle(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin)
 //    rayOrigin:    input ray origin
 vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
 {
-    if(hit_circle(vec3(0.0, 0.0, -1.0), 0.5, rayDirection, rayOrigin))
+    float hit = hit_circle(vec3(0.0, 0.0, -1.0), 0.5, rayDirection, rayOrigin);
+    if(hit > 0.0)
     {
-     	return vec4(1.0, 0.0, 0.0, 1.0);   
+        vec3 store = unit_vector(rayOrigin.xyz + (hit * rayDirection.xyz));
+     	return vec4(0.5*(store.x + 1.0),0.5*(store.y + 1.0), 0.5*(store.z + 1.0), 1.0); 
     }
     
     vec4 unitDirection = unit_vector(rayDirection);
     
-    float blend = 0.5 * (unitDirection.y + 1.0);
+    hit = 0.5 * (unitDirection.y + 1.0);
    
-    return mix(vec4(1.0), vec4(0.5, 0.7, 1.0, 1.0), blend);
+    return mix(vec4(1.0), vec4(0.5, 0.7, 1.0, 1.0), hit);
 }
 
+
+// Provided by Dan Buckstein
+// mainImage: process the current pixel (exactly one call per pixel)
+//    fragColor: output final color for current pixel
+//    fragCoord: input location of current pixel in image (in pixels)
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
+{
+    // viewing plane (viewport) info
+    vec2 viewport, ndc, uv, resolutionInv;
+    float aspect;
+    const float viewportHeight = 2.0, focalLength = 1.0;
+
+    // ray
+    vec4 rayDirection, rayOrigin;
+
+    // setup
+    calcViewport(viewport, ndc, uv, aspect, resolutionInv,
+                 viewportHeight, fragCoord, iResolution.xy);
+    calcRay(rayDirection, rayOrigin,
+            viewport, focalLength);
+
+    // color
+    fragColor = calcColor(rayDirection, rayOrigin);
+
+    // TEST COLOR:
+    //  -> what do the other things calculated above look like?
+    //fragColor = vec4(viewport, 0.0, 0.0);
+    //fragColor = vec4(ndc, 0.0, 0.0);
+    //fragColor = vec4(uv, 0.0, 0.0);
+}
 
 // Provided by Dan Buckstein
 // mainImage: process the current pixel (exactly one call per pixel)
