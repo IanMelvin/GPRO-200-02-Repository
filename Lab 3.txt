@@ -6,6 +6,20 @@
 
 */
 
+struct hit_record{
+  	vec3 point;
+    vec3 normal;
+    float temp;
+};
+    
+struct sphere{
+	vec3 center;
+    float radius;
+};
+
+
+
+
 // Provided by Dan Buckstein
 // calcViewport: calculate the viewing plane (viewport) coordinate
 //    viewport:       output viewing plane coordinate
@@ -77,6 +91,44 @@ float lengthSquared(in vec3 x)
 float lengthSquared(in vec4 x)
 {
     return dot(x,x);
+}
+
+//Might need to tweak vec#'s either move to vec3's or vec4's
+bool hit(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin, float t_max, float t_min, hit_record rec)
+{
+	vec3 originToCenter =  rayOrigin.xyz - center;
+    float len2 = lengthSquared(rayDirection);
+    float component = dot(originToCenter, rayDirection.xyz);
+    float ocMinusRadSqred = lengthSquared(originToCenter) - radius*radius;
+    float discriminant = component*component - len2*ocMinusRadSqred;
+    if(discriminant > 0.0)
+    {
+        float root = sqrt(discriminant);
+        	
+        float temp = (-component - root) / len2;
+         
+        if(temp < t_max && temp > t_min)
+        {
+         	rec.temp = temp;
+            rec.point = rayOrigin.xyz + ( rec.temp * rayDirection.xyz );
+            rec.normal = (rec.point - center) / radius;
+            
+            return true;
+        }
+        
+        temp = (-component + root) / len2;
+        if(temp < t_max && temp > t_min)
+        {
+         	rec.temp = temp;
+            rec.point = rayOrigin.xyz + ( rec.temp * rayDirection.xyz );
+            rec.normal = (rec.point - center) / radius;
+            
+            return true;
+        }
+    }
+    
+    return false;
+    
 }
 
 //Takes in a vec3, a float, and two vec4s and returns a true or false value
