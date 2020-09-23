@@ -149,33 +149,3 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     //fragColor = vec4(ndc, 0.0, 0.0);
     //fragColor = vec4(uv, 0.0, 0.0);
 }
-
-// Provided by Dan Buckstein
-// mainImage: process the current pixel (exactly one call per pixel)
-//    fragColor: output final color for current pixel
-//    fragCoord: input location of current pixel in image (in pixels)
-void mainImage(out vec4 fragColor, in vec2 fragCoord)
-{
-    // viewing plane (viewport) info
-    vec2 viewport, ndc, uv, resolutionInv;
-    float aspect;
-    const float viewportHeight = 2.0, focalLength = 1.0;
-
-    // ray
-    vec4 rayDirection, rayOrigin;
-
-    // setup
-    calcViewport(viewport, ndc, uv, aspect, resolutionInv,
-                 viewportHeight, fragCoord, iResolution.xy);
-    calcRay(rayDirection, rayOrigin,
-            viewport, focalLength);
-
-    // color
-    fragColor = calcColor(rayDirection, rayOrigin);
-
-    // TEST COLOR:
-    //  -> what do the other things calculated above look like?
-    //fragColor = vec4(viewport, 0.0, 0.0);
-    //fragColor = vec4(ndc, 0.0, 0.0);
-    //fragColor = vec4(uv, 0.0, 0.0);
-}
