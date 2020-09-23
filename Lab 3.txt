@@ -18,7 +18,7 @@ struct sphere{
     float radius;
 };
 
-void set_face_normal(vec4 rayDirection, vec4 rayOrigin, vec3 outward_normal, hit_record rec)
+void set_face_normal(vec4 rayDirection, vec4 rayOrigin, vec3 outward_normal, out hit_record rec)
 {
     rec.front_face = dot(rayDirection.xyz, outward_normal) < 0.0;
     if(rec.front_face)
@@ -31,7 +31,6 @@ void set_face_normal(vec4 rayDirection, vec4 rayOrigin, vec3 outward_normal, hit
     }    
     
 }
-
 
 // Provided by Dan Buckstein
 // calcViewport: calculate the viewing plane (viewport) coordinate
@@ -106,8 +105,7 @@ float lengthSquared(in vec4 x)
     return dot(x,x);
 }
 
-//Might need to tweak vec#'s either move to vec3's or vec4's
-bool hit(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin, float t_max, float t_min, hit_record rec)
+bool hit(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin, float t_max, float t_min, out hit_record rec)
 {
 	vec3 originToCenter =  rayOrigin.xyz - center;
     float len2 = lengthSquared(rayDirection);
@@ -146,23 +144,19 @@ bool hit(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin, float t_m
     
 }
 
-//Takes in a vec3, a float, and two vec4s and returns a true or false value
-float hit_circle(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin)
+bool hittable(vec4 rayDirection, vec4 rayOrigin, out float t_max, float t_min, out hit_record rec, sphere spr)
 {
-    vec3 originToCenter =  rayOrigin.xyz - center;
-    float len2 = lengthSquared(rayDirection);
-    float component = dot(originToCenter, rayDirection.xyz);
-    float ocMinusRadSqred = lengthSquared(originToCenter) - radius*radius;
-    float discriminant = component*component - len2*ocMinusRadSqred;
-    if(discriminant < 0.0)
+    hit_record temp_rec;
+    bool hit_anything = false; 
+    
+    if(hit(spr.center, spr.radius, rayDirection, rayOrigin, t_max, t_min, temp_rec))
     {
-      return -1.0;
-    }
-    else
-    {
-      return (-component - sqrt(discriminant)) / (len2);
+      	hit_anything = true;
+        t_max = temp_rec.temp;
+        rec = temp_rec;
     }
     
+    return hit_anything;
 }
 
 // Base Function by Dan Buckstein
@@ -170,24 +164,29 @@ float hit_circle(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin)
 // calcColor: calculate the color of a pixel given a ray
 //    rayDirection: input ray direction
 //    rayOrigin:    input ray origin
-vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
+vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin, in sphere sphereArray[2])
 {
-    float hit = hit_circle(vec3(0.0, 0.0, -1.0), 0.5, rayDirection, rayOrigin);
-    if(hit > 0.0)
+    hit_record rec;
+    float t_max = 1.0 / 0.0; 
+    
+    bool store = hittable(rayDirection, rayOrigin, t_max, 0.0, rec, sphereArray[0]);
+    bool store2 = hittable(rayDirection, rayOrigin, t_max, 0.0, rec, sphereArray[1]);
+    
+    if(store || store2)
     {
-        vec3 store = unit_vector(rayOrigin.xyz + (hit * rayDirection.xyz));
-     	return vec4(0.5*(store.x + 1.0),0.5*(store.y + 1.0), 0.5*(store.z + 1.0), 1.0); 
+     	return 0.5 *(vec4(rec.normal, 1.0) + vec4(1.0));   
     }
     
     vec4 unitDirection = unit_vector(rayDirection);
     
-    hit = 0.5 * (unitDirection.y + 1.0);
+    float hit = 0.5 * (unitDirection.y + 1.0);
    
     return mix(vec4(1.0), vec4(0.5, 0.7, 1.0, 1.0), hit);
 }
 
 
 // Provided by Dan Buckstein
+// Modified by Ian Melvin based on work by Peter Shirley (Link in header)
 // mainImage: process the current pixel (exactly one call per pixel)
 //    fragColor: output final color for current pixel
 //    fragCoord: input location of current pixel in image (in pixels)
@@ -197,6 +196,19 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     vec2 viewport, ndc, uv, resolutionInv;
     float aspect;
     const float viewportHeight = 2.0, focalLength = 1.0;
+    
+    //sphere info
+    sphere spr1;
+    sphere spr2;
+    
+    spr1.center = vec3(0.0, 0.0, -1.0);
+    spr2.center = vec3(0.0, -100.5, -1.0);
+    
+    spr1.radius = 0.5;
+    spr2.radius = 100.0;
+    
+	//sphere array
+    sphere sphereArray[2] = sphere[2](spr1, spr2);
 
     // ray
     vec4 rayDirection, rayOrigin;
@@ -208,11 +220,5 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
             viewport, focalLength);
 
     // color
-    fragColor = calcColor(rayDirection, rayOrigin);
-
-    // TEST COLOR:
-    //  -> what do the other things calculated above look like?
-    //fragColor = vec4(viewport, 0.0, 0.0);
-    //fragColor = vec4(ndc, 0.0, 0.0);
-    //fragColor = vec4(uv, 0.0, 0.0);
+    fragColor = calcColor(rayDirection, rayOrigin, sphereArray);
 }
