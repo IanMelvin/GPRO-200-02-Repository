@@ -10,6 +10,7 @@ struct hit_record{
   	vec3 point;
     vec3 normal;
     float temp;
+    bool front_face;
 };
     
 struct sphere{
@@ -17,7 +18,19 @@ struct sphere{
     float radius;
 };
 
-
+void set_face_normal(vec4 rayDirection, vec4 rayOrigin, vec3 outward_normal, hit_record rec)
+{
+    rec.front_face = dot(rayDirection.xyz, outward_normal) < 0.0;
+    if(rec.front_face)
+    {
+        rec.normal = outward_normal;
+    }
+    else 
+    {
+     	rec.normal = -outward_normal;   
+    }    
+    
+}
 
 
 // Provided by Dan Buckstein
@@ -111,7 +124,8 @@ bool hit(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin, float t_m
         {
          	rec.temp = temp;
             rec.point = rayOrigin.xyz + ( rec.temp * rayDirection.xyz );
-            rec.normal = (rec.point - center) / radius;
+            vec3 outward_normal = (rec.point - center) / radius;
+            set_face_normal(rayDirection, rayOrigin, outward_normal, rec);
             
             return true;
         }
@@ -121,7 +135,8 @@ bool hit(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin, float t_m
         {
          	rec.temp = temp;
             rec.point = rayOrigin.xyz + ( rec.temp * rayDirection.xyz );
-            rec.normal = (rec.point - center) / radius;
+            vec3 outward_normal = (rec.point - center) / radius;
+            set_face_normal(rayDirection, rayOrigin, outward_normal, rec);
             
             return true;
         }
