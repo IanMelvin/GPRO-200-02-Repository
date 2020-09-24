@@ -104,16 +104,16 @@ void calcRay(out vec4 rayDirection, out vec4 rayOrigin,
     rayDirection = vec4(viewport.x, viewport.y, -focalLength, 0.0);
 }
 
-//Takes in a vector and returns the vector divided by its length
+//Takes in a vec4 and returns the vector divided by its length
 vec4 unit_vector(in vec4 vector)
 {
- 	   return vector/length(vector);
+ 	   return vector / length(vector);
 }
 
-//Takes in a vector and returns the vector divided by its length
+//Takes in a vec3 and returns the vector divided by its length
 vec3 unit_vector(in vec3 vector)
 {
- 	   return vector/length(vector);
+ 	   return vector / length(vector);
 }
 
 //Provided by Dan Buckstein during class
