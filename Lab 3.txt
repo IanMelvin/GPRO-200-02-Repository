@@ -6,24 +6,32 @@
 
 */
 
+//Declaration of struct
+//inspired on hit_record from Peter Shirley (Link in header)
 struct hit_record{
   	vec3 point;
     vec3 normal;
     float temp;
     bool front_face;
 };
-    
+
+//Declaration of struct
+//inspired on sphere class from Peter Shirley (Link in header)
 struct sphere{
 	vec3 center;
     float radius;
 };
 
+//Declaration of struct
+//inspired on camera class from Peter Shirley (Link in header)
 struct camera{
     vec3 horizontal;
     vec3 vertical;
     vec3 lower_left_corner;
 };
-    
+   
+//takes in two vec4, a vec3 and a hit_record and outs a modified hit_record
+//based on work by Peter Shirley (Link in header)
 void set_face_normal(vec4 rayDirection, vec4 rayOrigin, vec3 outward_normal, out hit_record rec)
 {
     rec.front_face = dot(rayDirection.xyz, outward_normal) < 0.0;
@@ -38,6 +46,8 @@ void set_face_normal(vec4 rayDirection, vec4 rayOrigin, vec3 outward_normal, out
     
 }
 
+//takes in a camera, a vec4, and 3 floats and outs a modified camera
+//based on work by Peter Shirley (Link in header)
 void set_cam(out camera cam, vec4 origin, float viewportWidth, float viewportHeight, float focal_length)
 {
  	cam.horizontal = vec3(viewportWidth, 0.0, 0.0);
@@ -100,6 +110,7 @@ vec4 unit_vector(in vec4 vector)
  	   return vector/length(vector);
 }
 
+//Takes in a vector and returns the vector divided by its length
 vec3 unit_vector(in vec3 vector)
 {
  	   return vector/length(vector);
@@ -119,6 +130,9 @@ float lengthSquared(in vec4 x)
     return dot(x,x);
 }
 
+//Takes in a vec3, two vec4s, three floats, and a hit_record and returns a boolean and outs a hit_record
+//Determines if a sphere is hit
+//based on work by Peter Shirley (Link in header)
 bool hit(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin, float t_max, float t_min, out hit_record rec)
 {
 	vec3 originToCenter =  rayOrigin.xyz - center;
@@ -158,6 +172,8 @@ bool hit(vec3 center, float radius, vec4 rayDirection, vec4 rayOrigin, float t_m
     
 }
 
+//Takes in two vec4s, two floats and a sphere. Returns a bool, and outs a hit_record and a float
+//based on work by Peter Shirley (Link in header)
 bool hittable(vec4 rayDirection, vec4 rayOrigin, out float t_max, float t_min, out hit_record rec, sphere spr)
 {
     hit_record temp_rec;
@@ -198,12 +214,10 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin, in sphere sphereArray[2]
     return mix(vec4(1.0), vec4(0.5, 0.7, 1.0, 1.0), hit);
 }
 
-//Based of of code given by https://www.geeks3d.com/20100831/shader-library-noise-and-pseudo-random-number-generator-in-glsl/
+//Based of of code given by https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
 float randomFloat(vec2 seed)
 {
- 	int number = int(seed.x*40.0 + seed.y*6400.0);
-    number = (number << 13) ^ number;
-    return 1.0 -float(number * (number * number * 15731 + 789221) + 1376312589) * float(0x7fffffff);
+    return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
 
@@ -248,13 +262,15 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     
    	set_cam(cam, rayOrigin, aspect*viewportHeight, viewportHeight, focalLength);
     
+    //declare vector 3
     vec4 mixed;
-
+	
+    //loop to collect 
     for(float i = 0.0; i < samples_per_pixel; i++)
     {
-        float u = (fragCoord.x + randomFloat(fragCoord)) / ((viewportHeight*aspect) - 1.0);
+        float u = (fragCoord.x + randomFloat(fragCoord)) / ((viewportHeight * aspect) - 1.0);
         float v = (fragCoord.x + randomFloat(fragCoord)) / (viewportHeight - 1.0);
-        rayDirection = vec4(cam.lower_left_corner + u * cam.horizontal + v * cam.vertical, 1.0) - rayOrigin;
+        rayDirection = vec4(cam.lower_left_corner + u * cam.horizontal + v * cam.vertical, 0.0) - rayOrigin;
         calcRay(rayDirection, rayOrigin, viewport, focalLength);
         
         mixed += calcColor(rayDirection, rayOrigin, sphereArray);
