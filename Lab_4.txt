@@ -61,6 +61,7 @@ void calcRay(out vec4 rayDirection, out vec4 rayOrigin,
     rayDirection = asOffset(viewport - eyePosition);
 }
 
+//declaration for struct and struct variables
 struct lLight
 {
     vec4 center;
@@ -69,6 +70,7 @@ struct lLight
     
 };
 
+//Takes in a light, a vec3, a vec4, a float, and outs a light with instantiated values
 void initLight(out lLight light, in vec3 center, in vec4 color, in float intensity)
 {
  	light.center = asPoint(center);
@@ -76,43 +78,51 @@ void initLight(out lLight light, in vec3 center, in vec4 color, in float intensi
     light.intensity = intensity;
 }
 
+//declaration for struct and struct variables
 struct sSphere
 {
 	vec4 center;
     float radius;
 };
-    
+
+//Takes in a sphere, a vec3, a float, and outs a sphere with instantiated values
 void initSphere(out sSphere sphere, in vec3 center, in float radius)
 {
  	sphere.center = asPoint(center);
     sphere.radius = radius;
 }
 
+//Takes in a vec2 and returns the dot products of the vec2
 float lenSq(vec2 x)
 {
     return dot(x,x);
 }
 
+//Takes in a vec23and returns the dot products of the vec3
 float lenSq(vec3 x)
 {
     return dot(x,x);
 }
 
+//Takes in a float and returns the float multiplied by itself
 float squared(float x)
 {
     return x * x;
 }
 
+//Takes in two vec3s and returns the dot product of them but the bottom is capped at 0.0
 float maxDotProd(vec3 vector1, vec3 vector2)
 {
     return max(0.0, dot(vector1, vector2));
 }
 
+//Takes in a vec3 and returns the normalized vec3
 vec3 normalizer(vec3 vector)
 {
     return normalize(vector);
 }
 
+//Takes in a light, three vec4s, a vec3, a float, and returns a vec4
 vec4 reflections(in lLight light, in vec4 rayDirection, in vec4 rayOrigin, in vec3 normal, in vec4 color, in float highexp)
 {
  	//Lambertian reflection
@@ -125,7 +135,7 @@ vec4 reflections(in lLight light, in vec4 rayDirection, in vec4 rayOrigin, in ve
     float attenuation = light.intensity / (lenSq(rayDirection.xyz - lVector) + 1.0);
         
     // Diffuse intencity
-    vec4 diffuseIntencity = vec4(diffuseCoeff*color*light.color) * attenuation;
+    vec4 diffuseIntencity = diffuseCoeff * color * light.color * attenuation;
 
     //Blinn-Phong reflectance
     vec3 view = normalizer(rayOrigin.xyz - rayDirection.xyz);
@@ -133,8 +143,7 @@ vec4 reflections(in lLight light, in vec4 rayDirection, in vec4 rayOrigin, in ve
     float newSpecCoeffExp = pow(maxDotProd(normal, halfway), 4.0 * highexp);
         
     //Color
-    vec4 newColor = 0.03*vec4(0.8, 0.4, 0.2, 1.0) + (diffuseIntencity * color + newSpecCoeffExp * vec4(0.2, 0.4, 0.8, 1.0)) * light.color;
-    return newColor;   
+    return 0.03 * vec4(0.8, 0.4, 0.2, 1.0) + (diffuseIntencity * color + newSpecCoeffExp * vec4(0.2, 0.4, 0.8, 1.0)) * light.color;  
 }
 
 // calcColor: calculate the color of a pixel given a ray
@@ -166,9 +175,9 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
         vec4 color = vec4(normal * 0.5 + 0.5, 1.0);
         
         vec4 refColor = reflections(light, rayDirection, rayOrigin, normal, color, 64.0);
-        refColor += reflections(light2, rayDirection, rayOrigin, normal, color, 16.0);
-        refColor += reflections(light3, rayDirection, rayOrigin, normal, color, 1.0);
-        refColor += reflections(light4, rayDirection, rayOrigin, normal, color, 256.0);
+        refColor += reflections(light2, rayDirection, rayOrigin, normal, color, 24.0);
+        refColor += reflections(light3, rayDirection, rayOrigin, normal, color, 4.0);
+        refColor += reflections(light4, rayDirection, rayOrigin, normal, color, 128.0);
         
         return 0.1*vec4(0.8, 0.4, 0.2, 1.0) + refColor;
     }
