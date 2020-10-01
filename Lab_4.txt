@@ -93,28 +93,47 @@ float lenSq(vec2 x)
     return dot(x,x);
 }
 
+float lenSq(vec3 x)
+{
+    return dot(x,x);
+}
+
+float squared(float x)
+{
+    return x * x;
+}
+
+float maxDotProd(vec3 vector1, vec3 vector2)
+{
+    return max(0.0, dot(vector1, vector2));
+}
+
+vec3 normalizer(vec3 vector)
+{
+    return normalize(vector);
+}
+
 vec4 reflections(in lLight light, in vec4 rayDirection, in vec4 rayOrigin, in vec3 normal, in vec4 color, in float highexp)
 {
  	//Lambertian reflection
     // Diffuse Coefficient
-    vec3 lVector = normalize(light.center.xyz - rayDirection.xyz);
-   	float diffuseCoeff = max(0.0, dot(normal, lVector));
+    vec3 lVector = normalizer(light.center.xyz - rayDirection.xyz);
+   	float diffuseCoeff = maxDotProd(normal, lVector);
         
     // Attenuation  
     // based on https://f.usemind.org/files/b/1/UseMind.ORG_comprehensive-tutorial-and-reference_2015__.pdf, Listing 13.30
-    float dist = length(rayDirection.xyz - lVector);
-    float attenuation = light.intensity / (dist * dist + 1.0);
+    float attenuation = light.intensity / (lenSq(rayDirection.xyz - lVector) + 1.0);
         
     // Diffuse intencity
     vec4 diffuseIntencity = vec4(diffuseCoeff*color*light.color) * attenuation;
 
     //Blinn-Phong reflectance
-    vec3 view = normalize(rayOrigin.xyz - rayDirection.xyz);
-    vec3 halfway = normalize(lVector + view);
-    float newSpecCoeffExp = pow(max(0.0, dot(normal, halfway)), 4.0 * highexp);
+    vec3 view = normalizer(rayOrigin.xyz - rayDirection.xyz);
+    vec3 halfway = normalizer(lVector + view);
+    float newSpecCoeffExp = pow(maxDotProd(normal, halfway), 4.0 * highexp);
         
-    //color
-    vec4 newColor = (diffuseIntencity * color + newSpecCoeffExp * vec4(0.2, 0.4, 0.8, 1.0)) * light.color;
+    //Color
+    vec4 newColor = 0.03*vec4(0.8, 0.4, 0.2, 1.0) + (diffuseIntencity * color + newSpecCoeffExp * vec4(0.2, 0.4, 0.8, 1.0)) * light.color;
     return newColor;   
 }
 
@@ -136,16 +155,13 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
     
     vec3 dp;
     dp.xy = rayDirection.xy - sphere.center.xy;
-    float lsq = lenSq(dp.xy),
-        rsq = sphere.radius * sphere.radius;
+    float lsq = lenSq(dp.xy), rsq = squared(sphere.radius);
     
     if (lsq <= rsq)
     {
         dp.z = rsq - lsq;
         
-        vec3 position = sphere.center.xyz + vec3(dp.x, dp.y, sqrt(dp.z));
-        
-        vec3 normal = (position - sphere.center.xyz) / sphere.radius;
+        vec3 normal = vec3(dp.x, dp.y, sqrt(dp.z)) / sphere.radius;
         
         vec4 color = vec4(normal * 0.5 + 0.5, 1.0);
         
@@ -153,7 +169,6 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
         refColor += reflections(light2, rayDirection, rayOrigin, normal, color, 16.0);
         refColor += reflections(light3, rayDirection, rayOrigin, normal, color, 1.0);
         refColor += reflections(light4, rayDirection, rayOrigin, normal, color, 256.0);
-        
         
         return 0.1*vec4(0.8, 0.4, 0.2, 1.0) + refColor;
     }
