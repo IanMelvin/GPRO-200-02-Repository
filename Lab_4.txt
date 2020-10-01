@@ -160,8 +160,8 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
     
 	// BACKGROUND
 	const vec3 warm = vec3(0.8, 0.4, 0.2), cool = vec3(0.2, 0.4, 0.8);
-	//return vec4(mix(warm, cool, rayDirection.y), 1.0);
-    return vec4(0.5);
+	return vec4(mix(warm, cool, rayDirection.y), 1.0);
+    //return vec4(0.5);
 }
 
 // mainImage: process the current pixel (exactly one call per pixel)
