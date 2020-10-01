@@ -136,14 +136,22 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
         // Diffuse intencity
         //return vec4(diffuseCoeff*color); //* attenuation);
         
-        //Specular coefficient & highlight exponent
+        //Phong
+        // Specular coefficient & highlight exponent
         vec3 view = normalize(rayOrigin.xyz - rayDirection.xyz);
         vec3 reflected = reflect(-lVector, normal);
         
         float specCoeffExp = pow(max(0.0, dot(view, reflected)), 256.0);
         //return vec4(specCoeffExp);
         
-        vec4 newColor = 0.1*vec4(0.8, 0.4, 0.2, 1.0) + (diffuseCoeff * color + specCoeffExp * vec4(0.2, 0.4, 0.8, 1.0)) * light.color;
+        //vec4 newColor = 0.1*vec4(0.8, 0.4, 0.2, 1.0) + (diffuseCoeff * color + specCoeffExp * vec4(0.2, 0.4, 0.8, 1.0)) * light.color;
+        //return newColor;
+        
+        //Blinn-Phong reflectance
+        vec3 halfway = normalize(lVector + view);
+        float newSpecCoeffExp = pow(max(0.0, dot(normal, halfway)), 4.0 * 256.0);
+        
+        vec4 newColor = 0.1*vec4(0.8, 0.4, 0.2, 1.0) + (diffuseCoeff * color + newSpecCoeffExp * vec4(0.2, 0.4, 0.8, 1.0)) * light.color;
         return newColor;
         
        
