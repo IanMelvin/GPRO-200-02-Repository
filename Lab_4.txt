@@ -128,14 +128,18 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
         vec3 lVector = normalize(light.center.xyz - rayDirection.xyz);
     	float diffuseCoeff = max(0.0, dot(normal, lVector));
         
-        // Attenuation didn't finish
-        float dist = distance(light.center.xyz, rayDirection.xyz);
-        float attenuation = 1.0 / (1.0 + (dist / light.intensity) + ((dist * dist) / (light.intensity * light.intensity)));
+        // Attenuation  (didn't finish)
+        //float dist = distance(light.center.xyz, rayDirection.xyz);
+        //float attenuation = 1.0 / (1.0 + (dist / light.intensity) + ((dist * dist) / (light.intensity * light.intensity)));
         
+        // Attenuation (another version) 
+        // based on https://f.usemind.org/files/b/1/UseMind.ORG_comprehensive-tutorial-and-reference_2015__.pdf, Listing 13.30
+        float dist = length(rayDirection.xyz - lVector);
+        float attenuation = 3.0 / (dist * dist + 1.0);
         
         // Diffuse intencity
-        vec4 diffuseIntencity = vec4(diffuseCoeff*color*light.color);
-        //return diffuseIntencity; //* attenuation);
+        vec4 diffuseIntencity = vec4(diffuseCoeff*color*light.color) * attenuation;
+        //return diffuseIntencity;
         
         //Phong
         // Specular coefficient & highlight exponent
