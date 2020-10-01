@@ -134,7 +134,7 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
         
         
         // Diffuse intencity
-        //return vec4(diffuseCoeff*color); //* attenuation);
+        return vec4(diffuseCoeff*color*light.color); //* attenuation);
         
         //Phong
         // Specular coefficient & highlight exponent
