@@ -93,6 +93,31 @@ float lenSq(vec2 x)
     return dot(x,x);
 }
 
+vec4 reflections(in lLight light, in vec4 rayDirection, in vec4 rayOrigin, in vec3 normal, in vec4 color, in float highexp)
+{
+ 	//Lambertian reflection
+    // Diffuse Coefficient
+    vec3 lVector = normalize(light.center.xyz - rayDirection.xyz);
+   	float diffuseCoeff = max(0.0, dot(normal, lVector));
+        
+    // Attenuation  
+    // based on https://f.usemind.org/files/b/1/UseMind.ORG_comprehensive-tutorial-and-reference_2015__.pdf, Listing 13.30
+    float dist = length(rayDirection.xyz - lVector);
+    float attenuation = light.intensity / (dist * dist + 1.0);
+        
+    // Diffuse intencity
+    vec4 diffuseIntencity = vec4(diffuseCoeff*color*light.color) * attenuation;
+
+    //Blinn-Phong reflectance
+    vec3 view = normalize(rayOrigin.xyz - rayDirection.xyz);
+    vec3 halfway = normalize(lVector + view);
+    float newSpecCoeffExp = pow(max(0.0, dot(normal, halfway)), 4.0 * highexp);
+        
+    //color
+    vec4 newColor = (diffuseIntencity * color + newSpecCoeffExp * vec4(0.2, 0.4, 0.8, 1.0)) * light.color;
+    return newColor;   
+}
+
 // calcColor: calculate the color of a pixel given a ray
 //    rayDirection: input ray direction
 //    rayOrigin:    input ray origin
@@ -103,8 +128,11 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
     initSphere(sphere, vec3(0.0, 0.0, -4.0), 0.5);
     
     //light
-    lLight light;
-    initLight(light, vec3(200.0, 200.0, 300.0), vec4(1.0, 1.0, 1.0, 1.0), 2.0);
+    lLight light, light2, light3, light4;
+    initLight(light, vec3(200.0, 200.0, 300.0), vec4(1.0, 1.0, 1.0, 1.0), 3.0);
+    initLight(light2, vec3(-200.0, 500.0, 150.0), vec4(0.5, 0.1, 0.2, 1.0), 10.0);
+    initLight(light3, vec3(0.0, -50.0, 0.0), vec4(0.1, 0.8, 0.6, 1.0), 3.0);
+    initLight(light4, vec3(-200.0, -200.0, -300.0), vec4(0.7, 0.3, 0.9, 1.0), 2.0);
     
     vec3 dp;
     dp.xy = rayDirection.xy - sphere.center.xy;
@@ -121,51 +149,18 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
         
         vec4 color = vec4(normal * 0.5 + 0.5, 1.0);
         
-        //return vec4(normal * 0.5 + 0.5, 1.0);
+        vec4 refColor = reflections(light, rayDirection, rayOrigin, normal, color, 64.0);
+        refColor += reflections(light2, rayDirection, rayOrigin, normal, color, 16.0);
+        refColor += reflections(light3, rayDirection, rayOrigin, normal, color, 1.0);
+        refColor += reflections(light4, rayDirection, rayOrigin, normal, color, 256.0);
         
-        //Lambertian reflection
-    	// Diffuse Coefficient
-        vec3 lVector = normalize(light.center.xyz - rayDirection.xyz);
-    	float diffuseCoeff = max(0.0, dot(normal, lVector));
         
-        // Attenuation  (didn't finish)
-        //float dist = distance(light.center.xyz, rayDirection.xyz);
-        //float attenuation = 1.0 / (1.0 + (dist / light.intensity) + ((dist * dist) / (light.intensity * light.intensity)));
-        
-        // Attenuation (another version) 
-        // based on https://f.usemind.org/files/b/1/UseMind.ORG_comprehensive-tutorial-and-reference_2015__.pdf, Listing 13.30
-        float dist = length(rayDirection.xyz - lVector);
-        float attenuation = 3.0 / (dist * dist + 1.0);
-        
-        // Diffuse intencity
-        vec4 diffuseIntencity = vec4(diffuseCoeff*color*light.color) * attenuation;
-        //return diffuseIntencity;
-        
-        //Phong
-        // Specular coefficient & highlight exponent
-        vec3 view = normalize(rayOrigin.xyz - rayDirection.xyz);
-        vec3 reflected = reflect(-lVector, normal);
-        
-        float specCoeffExp = pow(max(0.0, dot(view, reflected)), 256.0);
-        //return vec4(specCoeffExp);
-        
-        //vec4 newColor = 0.1*vec4(0.8, 0.4, 0.2, 1.0) + (diffuseCoeff * color + specCoeffExp * vec4(0.2, 0.4, 0.8, 1.0)) * light.color;
-        //return newColor;
-        
-        //Blinn-Phong reflectance
-        vec3 halfway = normalize(lVector + view);
-        float newSpecCoeffExp = pow(max(0.0, dot(normal, halfway)), 4.0 * 64.0);
-        
-        vec4 newColor = 0.1*vec4(0.8, 0.4, 0.2, 1.0) + (diffuseIntencity * color + newSpecCoeffExp * vec4(0.2, 0.4, 0.8, 1.0)) * light.color;
-        return newColor;
-        
-       
+        return 0.1*vec4(0.8, 0.4, 0.2, 1.0) + refColor;
     }
     
 	// BACKGROUND
 	const vec3 warm = vec3(0.8, 0.4, 0.2), cool = vec3(0.2, 0.4, 0.8);
 	return vec4(mix(warm, cool, rayDirection.y), 1.0);
-    //return vec4(0.5);
 }
 
 // mainImage: process the current pixel (exactly one call per pixel)
