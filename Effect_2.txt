@@ -185,7 +185,7 @@ sCoord distortEffect(sCoord coord)
     float radius = dot(coord, coord);
     coord.x = radius * cos(theta);
     coord.y = radius * sin(theta);
-    return 0.5 * (coord * 0.5 + 1.0);
+    return 1.5 * (coord * 0.5 + 1.0);
 
 }
 
