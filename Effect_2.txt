@@ -3,7 +3,7 @@
 //------------------------------------------------------------
 // TYPE ALIASES & UTILITY FUNCTIONS
 // Modified by Ian Melvin
-// Implemented cross-fade
+// Implemented Distortion Effect
 
 // sScalar: alias for a 1D scalar (non-vector)
 #define sScalar float
@@ -171,6 +171,30 @@ void initRayOrtho(out sRay ray,
 //------------------------------------------------------------
 // RENDERING FUNCTIONS
 
+
+float pow2(float x)
+{
+  return x*x;   
+}
+
+// Takes in a 2D coordinate manipulates the values and returns a new 2D coordinate (Barrel Distortion)
+// Inspired by https://prideout.net/barrel-distortion
+sCoord distortEffect(sCoord coord)
+{
+    /*
+    float distortion = 0.4;
+    float radius = dot(coord.xy, coord.xy);
+    coord *= 0.9 + distortion * radius + distortion * radius * radius;
+    return 0.5 * (coord * 0.5 + 1.0);*/
+    
+    float theta = atan(coord.x, coord.y);
+    float radius = dot(coord, coord);
+    coord.x = radius * cos(theta);
+    coord.y = radius * sin(theta);
+    return 0.5 * (coord * 0.5 + 1.0);
+
+}
+
 // calcColor: calculate the color of current pixel
 //	  vp:  input viewport info
 //	  ray: input ray info
@@ -183,8 +207,10 @@ color4 calcColor(in sViewport vp, in sRay ray)
     //return color4(vp.ndc, 0.0, 0.0);
     //return vp.viewportPoint;
     
-    //return texture(iChannel0, vp.uv);
-    return mix(texture(iChannel0,vp.uv), texture(iChannel1,vp.uv), sin(iTime)); //Cross-Fade
+    sCoord newUV = distortEffect(vp.uv);
+    
+    return texture(iChannel0, newUV);
+    return texture(iChannel0, vp.uv);
 }
 
 
