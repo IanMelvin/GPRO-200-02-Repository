@@ -3,7 +3,7 @@
 //------------------------------------------------------------
 // TYPE ALIASES & UTILITY FUNCTIONS
 // Modified by Ian Melvin
-// Implemented cross-fade
+// Implemented Shading & texturing
 
 // sScalar: alias for a 1D scalar (non-vector)
 #define sScalar float
@@ -171,6 +171,18 @@ void initRayOrtho(out sRay ray,
 //------------------------------------------------------------
 // RENDERING FUNCTIONS
 
+//Takes in two vec3s and returns the dot product of them but the bottom is capped at 0.0
+float maxDotProd(vec3 vector1, vec3 vector2)
+{
+    return max(0.0, dot(vector1, vector2));
+}
+
+//Takes in a vec3 and returns the dot products of the vec3
+float lenSq(vec3 x)
+{
+    return dot(x,x);
+}
+
 // calcColor: calculate the color of current pixel
 //	  vp:  input viewport info
 //	  ray: input ray info
@@ -183,8 +195,24 @@ color4 calcColor(in sViewport vp, in sRay ray)
     //return color4(vp.ndc, 0.0, 0.0);
     //return vp.viewportPoint;
     
+    vec2 surfPos = vp.pixelCoord;
+    vec3 surfaceNormal = vec3(0.0, 0.0, 1.0);
+    vec3 lightPos = vec3(-200.0, 500.0, 150.0);
+    
+    //Lambertian reflection
+    //Based on my own work from Lab_4 with same sources cited where appropriate
+    vec3 lVector = normalize(lightPos - vec3(surfPos,0.0));
+   	float diffuseCoeff = maxDotProd(surfaceNormal, lVector);
+    
+    // Attenuation  
+    // based on https://f.usemind.org/files/b/1/UseMind.ORG_comprehensive-tutorial-and-reference_2015__.pdf, Listing 13.30
+    float attenuation = 10.0 / (lenSq(ray.direction.xyz - lVector) + 1.0);
+        
+    // Diffuse intencity
+    vec4 diffuseIntencity = diffuseCoeff * texture(iChannel0, vp.uv) * vec4(1.0, 0.7, 1.0, 1.0) * attenuation;
+    
     //return texture(iChannel0, vp.uv);
-    return mix(texture(iChannel0,vp.uv), texture(iChannel1,vp.uv), sin(iTime)); //Cross-Fade
+    return diffuseIntencity;
 }
 
 
