@@ -3,8 +3,7 @@
 //------------------------------------------------------------
 // TYPE ALIASES & UTILITY FUNCTIONS
 // Modified by Ian Melvin
-// Implemented cross-fade
-
+// Implemented cube map
 // sScalar: alias for a 1D scalar (non-vector)
 #define sScalar float
 
@@ -183,8 +182,7 @@ color4 calcColor(in sViewport vp, in sRay ray)
     //return color4(vp.ndc, 0.0, 0.0);
     //return vp.viewportPoint;
     
-    //return texture(iChannel0, vp.uv);
-    return mix(texture(iChannel0,vp.uv), texture(iChannel1,vp.uv), sin(iTime)); //Cross-Fade
+    return texture(iChannel0, ray.direction.xyz);
 }
 
 
