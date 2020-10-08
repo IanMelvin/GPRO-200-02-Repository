@@ -177,16 +177,10 @@ float pow2(float x)
   return x*x;   
 }
 
-// Takes in a 2D coordinate manipulates the values and returns a new 2D coordinate (Barrel Distortion)
+// Takes in a 2D coordinate manipulates the values and returns a new 2D coordinate
 // Inspired by https://prideout.net/barrel-distortion
 sCoord distortEffect(sCoord coord)
 {
-    /*
-    float distortion = 0.4;
-    float radius = dot(coord.xy, coord.xy);
-    coord *= 0.9 + distortion * radius + distortion * radius * radius;
-    return 0.5 * (coord * 0.5 + 1.0);*/
-    
     float theta = atan(coord.x, coord.y);
     float radius = dot(coord, coord);
     coord.x = radius * cos(theta);
