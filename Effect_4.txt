@@ -4,6 +4,7 @@
 // TYPE ALIASES & UTILITY FUNCTIONS
 // Modified by Ian Melvin
 // Implemented cube map
+
 // sScalar: alias for a 1D scalar (non-vector)
 #define sScalar float
 
@@ -174,18 +175,18 @@ void initRayOrtho(out sRay ray,
 // Inspired by https://prideout.net/barrel-distortion
 vec3 distortEffect(vec3 coord)
 {
-    /*
-    float distortion = 0.4;
-    float radius = dot(coord.xy, coord.xy);
-    coord *= 0.9 + distortion * radius + distortion * radius * radius;
-    return 0.5 * (coord * 0.5 + 1.0);*/
-    
+
     float theta = atan(coord.x, coord.y);
     float radius = dot(coord, coord);
     coord.x = radius * cos(theta);
     coord.y = radius * sin(theta);
     return 0.5 * (coord * 0.5 + 1.0);
 
+}
+
+vec3 crossProd(vec3 x, vec3 y)
+{
+    return cross(x,y);
 }
 
 // calcColor: calculate the color of current pixel
@@ -204,10 +205,11 @@ color4 calcColor(in sViewport vp, in sRay ray)
     // based on https://en.wikipedia.org/wiki/Rotation_matrix#Vector_to_vector_formulation
     ray.direction.xyz = distortEffect(ray.direction.xyz);
     vec3 yAxis = vec3(0.0, 1.0, 0.0);
-    vec3 rot = yAxis * (dot(yAxis, ray.direction.xyz)) + cos(iTime) * cross(cross(yAxis, ray.direction.xyz), yAxis) + sin(iTime) * cross(yAxis, ray.direction.xyz);
+    vec3 crossAxis = crossProd(yAxis, ray.direction.xyz);
+    vec3 rot = yAxis * (dot(yAxis, ray.direction.xyz)) + cos(iTime) * crossProd(crossAxis, yAxis) + sin(iTime) * crossAxis;
  
     
-    return texture(iChannel0, rot);//ray.direction.xyz);
+    return texture(iChannel0, rot);
 }
 
 
