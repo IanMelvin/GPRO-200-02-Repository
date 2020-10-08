@@ -188,6 +188,13 @@ float modfiedLightPos()
     return cos(iTime);
 }
 
+vec3 normalizer(vec3 x)
+{
+    float len = sqrt(lenSq(x));
+    return (x / len);
+    
+}
+
 // calcColor: calculate the color of current pixel
 //	  vp:  input viewport info
 //	  ray: input ray info
@@ -206,7 +213,7 @@ color4 calcColor(in sViewport vp, in sRay ray)
     
     //Lambertian reflection
     //Based on my own work from Lab_4 with same sources cited where appropriate
-    vec3 lVector = normalize(lightPos - vec3(surfPos,0.0));
+    vec3 lVector = normalizer(lightPos - vec3(surfPos,0.0)); 
    	float diffuseCoeff = maxDotProd(surfaceNormal, lVector);
     
     // Attenuation  
