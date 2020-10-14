@@ -1,4 +1,33 @@
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+// GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
+//  -> Buffer B TAB (final)
+// Modified by Ian Melvin
+// Based off work done in GLSL 4.0 Cookbook (PG. 166)
+// https://people.inf.elte.hu/plisaai/pdf/David%20Wolff%20-%20OpenGL%204.0%20Shading%20Language%20Cookbook%20(2).pdf
+
+// luminance (Melvin): multiplies and adds up components of a vec3 to dim any value that isn't white
+// color: a vector 3 representing the rgb values of a pixel
+float luminance(vec3 color)
 {
-    fragColor = vec4(0.0,0.0,1.0,1.0);
+    return 0.2126 * color.x + 0.7152 * color.y + 0.0722 * color.z;
+}
+
+
+//------------------------------------------------------------
+// SHADERTOY MAIN
+
+// mainImage: process the current pixel (exactly one call per pixel)
+//    fragColor: output final color for current pixel
+//    fragCoord: input location of current pixel in image (in pixels)
+void mainImage(out color4 fragColor, in sCoord fragCoord)
+{
+    // setup
+    // test UV for input image
+    sCoord uv = fragCoord / iChannelResolution[0].xy;
+    
+    float lumThreshHold = 0.75, invLumThresh = 1.0 / (1.0 - lumThreshHold);
+    
+    vec4 image = texture(iChannel0 , uv);
+    
+    fragColor = image * clamp(luminance(image.xyz) - lumThreshHold, 0.0, 1.0) * invLumThresh;
+    
 }
