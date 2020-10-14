@@ -1,9 +1,8 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
+//  -> COMMON TAB (shared with all other tabs)
 
 //------------------------------------------------------------
 // TYPE ALIASES & UTILITY FUNCTIONS
-// Modified by Ian Melvin
-// Implemented cross-fade
 
 // sScalar: alias for a 1D scalar (non-vector)
 #define sScalar float
@@ -51,6 +50,12 @@ sVector asVector(in sBasis v)
 
 
 // lengthSq: calculate the squared length of a vector type
+//    x: input whose squared length to calculate
+sScalar lengthSq(sScalar x)
+{
+    return (x * x);
+    //return dot(x, x); // for consistency with others
+}
 sScalar lengthSq(sDCoord x)
 {
     return dot(x, x);
@@ -169,45 +174,33 @@ void initRayOrtho(out sRay ray,
 
 
 //------------------------------------------------------------
-// RENDERING FUNCTIONS
+/*
+// GLSL FRAGMENT SHADER STRUCTURE WITH COMMON TAB
+//  -> This is (likely) how Shadertoy compiles buffer tabs:
 
-// calcColor: calculate the color of current pixel
-//	  vp:  input viewport info
-//	  ray: input ray info
-color4 calcColor(in sViewport vp, in sRay ray)
+// latest version or whichever is used
+#version 300 es
+
+// **CONTENTS OF COMMON TAB PASTED HERE**
+
+// PROGRAM UNIFORMS (see 'Shader Inputs' dropdown)
+
+// **CONTENTS OF BUFFER TAB PASTED HERE**
+
+// FRAGMENT SHADER INPUTS (more on this later)
+
+// FRAGMENT SHADER OUTPUTS (framebuffer render target(s))
+//out vec4 rtFragColor; // no specific target
+layout (location = 0) out vec4 rtFragColor; // default
+
+void main()
 {
-    // test inputs
-    //return color4(ray.direction.xyz == vp.viewportPoint.xyz); // pass
-    //return color4(lengthSq(vp.viewportPoint.xy) >= 0.25); // pass
-    //return color4(vp.uv, 0.0, 0.0);
-    //return color4(vp.ndc, 0.0, 0.0);
-    //return vp.viewportPoint;
-    
-    //return texture(iChannel0, vp.uv);
-    return mix(texture(iChannel0,vp.uv), texture(iChannel1,vp.uv), sin(iTime)); //Cross-Fade
+    // Call 'mainImage' in actual shader main, which is 
+	// 	our prototyping interface for ease of use.
+	//		rtFragColor:  shader output passed by reference,
+	//			full vec4 read in 'mainImage' as 'fragColor'
+	//		gl_FragCoord: GLSL's built-in pixel coordinate,
+	//			vec2 part read in 'mainImage' as 'fragCoord'
+    mainImage(rtFragColor, gl_FragCoord.xy);
 }
-
-
-//------------------------------------------------------------
-// SHADERTOY MAIN
-
-// mainImage: process the current pixel (exactly one call per pixel)
-//    fragColor: output final color for current pixel
-//    fragCoord: input location of current pixel in image (in pixels)
-void mainImage(out color4 fragColor, in sCoord fragCoord)
-{
-    // viewing plane (viewport) inputs
-    const sBasis eyePosition = sBasis(0.0);
-    const sScalar viewportHeight = 2.0, focalLength = 1.5;
-    
-    // viewport info
-    sViewport vp;
-
-    // ray
-    sRay ray;
-    
-    // render
-    initViewport(vp, viewportHeight, focalLength, fragCoord, iResolution.xy);
-    initRayPersp(ray, eyePosition, vp.viewportPoint.xyz);
-    fragColor += calcColor(vp, ray);
-}
+*/
