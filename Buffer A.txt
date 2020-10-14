@@ -6,6 +6,11 @@
 //------------------------------------------------------------
 // RENDERING FUNCTIONS
 
+vec3 crossProd(vec3 x, vec3 y)
+{
+    return cross(x,y);
+}
+
 // calcColor: calculate the color of current pixel
 //	  vp:  input viewport info
 //	  ray: input ray info
@@ -16,7 +21,14 @@ color4 calcColor(in sViewport vp, in sRay ray)
     //return color4(lengthSq(vp.viewportPoint.xy) >= 0.25); // pass
     //return color4(vp.uv, 0.0, 0.0);
     //return color4(vp.ndc, 0.0, 0.0);
-    return asPoint(sBasis(vp.viewportPoint.xy, -vp.viewportPoint.z));
+    //return asPoint(sBasis(vp.viewportPoint.xy, -vp.viewportPoint.z));
+    
+    vec3 yAxis = vec3(0.0, 1.0, 0.0);
+    vec3 crossAxis = cross(yAxis, ray.direction.xyz);
+    vec3 rot = yAxis * (dot(yAxis, ray.direction.xyz)) - cos(iTime) * cross(crossAxis, yAxis) + sin(iTime) * crossAxis; //Do better
+ 
+    
+    return texture(iChannel0, rot);
 }
 
 
