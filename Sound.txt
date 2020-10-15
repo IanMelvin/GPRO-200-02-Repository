@@ -1,0 +1,23 @@
+//Ian Melvin
+
+// Takes in a 2D coordinate manipulates the values and returns a new 2D coordinate
+// Inspired by https://prideout.net/barrel-distortion
+vec2 distortEffect(vec2 coord)
+{
+    float theta = atan(coord.x, coord.y);
+    float radius = dot(coord, coord);
+    coord.x = radius * cos(theta);
+    coord.y = radius * sin(theta);
+    return 1.5 * (coord * 0.5 + 1.0);
+
+}
+
+vec2 mainSound( float time )
+{
+    float range = mod(time, 13.0);
+    
+	vec2 initial = vec2( sin(6.2831*440.0*time)*tan(exp(1.5*range)));
+    
+    
+    return distortEffect(initial);
+}
