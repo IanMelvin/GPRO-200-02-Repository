@@ -5,18 +5,33 @@
 // https://people.inf.elte.hu/plisaai/pdf/David%20Wolff%20-%20OpenGL%204.0%20Shading%20Language%20Cookbook%20(2).pdf
 
 // GausBlur (Melvin): adds nearby pixels 
+// uv: pixel coord multiplied by inverse resolution
+// weight: a normalized value based on Pascal's triangle
+vec4 textures(vec2 uv, float weight)
+{
+	return texture(iChannel0, uv) * weight;
+}
+
+// GausBlur (Melvin): adds nearby pixels 
+// upper: pixel coord
+// lower: inverse of resolution 
+vec2 uvCalc(vec2 upper, vec2 lower)
+{
+    return upper * lower;
+}
+
+// GausBlur (Melvin): adds nearby pixels 
 // fragCoord: pixel coord
+// lowerUV: inverse of resolution 
 // offset: how far the pixel is from the current pixel
 // weight: a normalized value based on Pascal's triangle
-vec4 GausBlur(sCoord fragCoord, vec2 offset, float weight)
+vec4 GausBlur(sCoord fragCoord, vec2 lowerUV, vec2 offset, float weight)
 {
-    vec4 sum = texture(iChannel0, fragCoord + offset) * weight;
-    sum += texture(iChannel0, fragCoord - offset) * weight;
+    vec4 sum = textures(uvCalc(fragCoord + offset, lowerUV), weight);
+    sum += textures(uvCalc(fragCoord - offset, lowerUV), weight);
 
     return sum;
 }
-
-
 
 //------------------------------------------------------------
 // SHADERTOY MAIN
@@ -30,17 +45,19 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     // test UV for input image
     sCoord uv = fragCoord / iChannelResolution[0].xy;
     
+    vec2 lowerUV = (1.0 / iChannelResolution[0].xy);
+    
     float norm = 1.0 / 16.0; //1.0 / 4.0; 
     
     vec4 sum = texture(iChannel0, uv) * 6.0; // * 2.0
     
     //fragColor += texture(iChannel0, uv);
     //3x3 Kernal
-    //sum += GausBlur(fragCoord, height, vec2(0.0, 0.0), 2.0);
-    //sum += GausBlur(fragCoord, height, vec2(1.0, 0.0), 1.0);
+    //sum += GausBlur(fragCoord, lowerUV vec2(0.0, 0.0), 2.0);
+    //sum += GausBlur(fragCoord, lowerUV, vec2(1.0, 0.0), 1.0);
     
     //5x5 Kernal
-    sum += GausBlur(fragCoord, vec2(1.0, 0.0), 4.0);
-    sum += GausBlur(fragCoord, vec2(2.0, 0.0), 1.0);
+    sum += GausBlur(fragCoord, lowerUV, vec2(1.0, 0.0), 4.0);
+    sum += GausBlur(fragCoord, lowerUV, vec2(2.0, 0.0), 1.0);
     fragColor = sum * norm;
 }
