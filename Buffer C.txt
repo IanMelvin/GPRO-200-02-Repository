@@ -4,17 +4,17 @@
 // Based off work done in GLSL 4.0 Cookbook (PG. 161)
 // https://people.inf.elte.hu/plisaai/pdf/David%20Wolff%20-%20OpenGL%204.0%20Shading%20Language%20Cookbook%20(2).pdf
 
-vec4 pass2(sCoord fragCoord, float dimension, vec4 image, vec2 offset, float weight)
+// GausBlur (Melvin): adds nearby pixels 
+// fragCoord: pixel coord
+// dimension: a specific value to determine whether a nearby pixel is above/below and/or left/right
+// image: a texture pulled in for modification
+// offset: how far the pixel is from the current pixel
+// weight: a normalized value based on Pascal's triangle
+vec4 GausBlur(sCoord fragCoord, float dimension, vec4 image, vec2 offset, float weight)
 {
-    //float PixOffset[3] = float[](0.0, 1.0, 2.0);
-    //float weight2[3] = float[](6.0, 4.0, 1.0); 
-    
-    
     image += texture(iChannel0, fragCoord + offset * dimension) * weight;
     image += texture(iChannel0, fragCoord - offset * dimension) * weight;
-    //image += texture(iChannel0, fragCoord + vec2(0.0,PixOffset[0]) * dimension) * weight[0];
-    //image += texture(iChannel0, fragCoord - vec2(0.0,PixOffset[0]) * dimension) * weight[0];
-    
+
     return image;
 }
 
@@ -41,11 +41,11 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     vec4 sum2 = texture(iChannel0, uv);
     
     fragColor += texture(iChannel0, uv);
-    sum1 += pass2(fragCoord, height, image, vec2(0.0, 0.0), 6.0 / norm);
-    sum1 += pass2(fragCoord, height, image, vec2(0.0, 1.0), 4.0 / norm);
-    sum1 += pass2(fragCoord, height, image, vec2(0.0, 2.0), 1.0 / norm);
-    sum2 += pass2(fragCoord, width, image, vec2(0.0, 0.0), 6.0 / norm);
-    sum2 += pass2(fragCoord, width, image, vec2(1.0, 0.0), 4.0 / norm);
-    sum2 += pass2(fragCoord, width, image, vec2(2.0, 0.0), 1.0 / norm);
-    fragColor *= (sum1 + sum2);
+    sum1 += GausBlur(fragCoord, height, image, vec2(0.0, 0.0), 6.0 / norm);
+    sum1 += GausBlur(fragCoord, height, image, vec2(0.0, 1.0), 4.0 / norm);
+    sum1 += GausBlur(fragCoord, height, image, vec2(0.0, 2.0), 1.0 / norm);
+    sum2 += GausBlur(fragCoord, width, image, vec2(0.0, 0.0), 6.0 / norm);
+    sum2 += GausBlur(fragCoord, width, image, vec2(1.0, 0.0), 4.0 / norm);
+    sum2 += GausBlur(fragCoord, width, image, vec2(2.0, 0.0), 1.0 / norm);
+    fragColor += (sum1 * sum2);
 }
