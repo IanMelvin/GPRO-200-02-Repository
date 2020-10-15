@@ -39,6 +39,11 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     vec4 sum = texture(iChannel0, uv);
     
     fragColor += texture(iChannel0, uv);
+    //3x3 kernal
+    //sum += GausBlur(fragCoord, width, image, vec2(0.0, 0.0), 2.0 / norm);
+    //sum += GausBlur(fragCoord, width, image, vec2(1.0, 0.0), 1.0 / norm);
+    
+    //5x5 kernal
     sum += GausBlur(fragCoord, width, image, vec2(0.0, 0.0), 6.0 / norm);
     sum += GausBlur(fragCoord, width, image, vec2(1.0, 0.0), 4.0 / norm);
     sum += GausBlur(fragCoord, width, image, vec2(2.0, 0.0), 1.0 / norm);
