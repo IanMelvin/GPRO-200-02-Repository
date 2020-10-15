@@ -1,5 +1,5 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
-//  -> Buffer C TAB (final)
+//  -> Buffer D TAB (final)
 // Modified by Ian Melvin
 // Based off work done in GLSL 4.0 Cookbook (PG. 161)
 // https://people.inf.elte.hu/plisaai/pdf/David%20Wolff%20-%20OpenGL%204.0%20Shading%20Language%20Cookbook%20(2).pdf
@@ -32,15 +32,15 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     // test UV for input image
     sCoord uv = fragCoord / iChannelResolution[0].xy;
     
-	float height = 1.0 / iResolution.y;
+    float width = 1.0 / iResolution.x;
     float norm = 1.0 / 16.0;
     
     vec4 image = texture(iChannel0, fragCoord) * 6.0;
     vec4 sum = texture(iChannel0, uv);
     
     fragColor += texture(iChannel0, uv);
-    sum += GausBlur(fragCoord, height, image, vec2(0.0, 0.0), 6.0 / norm);
-    sum += GausBlur(fragCoord, height, image, vec2(0.0, 1.0), 4.0 / norm);
-    sum += GausBlur(fragCoord, height, image, vec2(0.0, 2.0), 1.0 / norm);
+    sum += GausBlur(fragCoord, width, image, vec2(0.0, 0.0), 6.0 / norm);
+    sum += GausBlur(fragCoord, width, image, vec2(1.0, 0.0), 4.0 / norm);
+    sum += GausBlur(fragCoord, width, image, vec2(2.0, 0.0), 1.0 / norm);
     fragColor *= sum;
 }
