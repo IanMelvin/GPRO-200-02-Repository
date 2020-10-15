@@ -1,5 +1,7 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
 //  -> IMAGE TAB (final)
+// Modified by Ian Melvin
+// 
 
 //------------------------------------------------------------
 // SHADERTOY MAIN
@@ -15,6 +17,18 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     
     // TESTING
     // set iChannel0 to 'Misc/Buffer A' and fetch sample
-    fragColor = texture(iChannel0, uv);
-    //fragColor = texture(iChannel1, uv);
+    vec4 buffA = texture(iChannel1, uv);
+    vec4 buffC = texture(iChannel0, uv);
+    
+    //Add
+    fragColor = buffA + buffC;
+    
+    //Mix
+    fragColor = vec4(mix(buffA, buffC, 0.1));
+    
+    //Screen : based on https://en.wikipedia.org/wiki/Blend_modes#Screen
+    fragColor = vec4(1.0) - (vec4(1.0) - buffA) * (vec4(1.0) - buffC);
+    
+    //Lighten Only : inspired by Lighten Only from https://en.wikipedia.org/wiki/Blend_modes#Screen
+    fragColor = max(buffA, buffC);
 }
