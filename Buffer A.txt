@@ -1,40 +1,8 @@
-// GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
-//  -> BUFFER A TAB (scene)
-// Modified by Ian Melvin
-
-
-//------------------------------------------------------------
-// RENDERING FUNCTIONS
-
-vec3 crossProd(vec3 x, vec3 y)
-{
-    return cross(x,y);
-}
-
-// calcColor: calculate the color of current pixel
-//	  vp:  input viewport info
-//	  ray: input ray info
-color4 calcColor(in sViewport vp, in sRay ray)
-{
-    vec3 yAxis = vec3(0.0, 1.0, 0.0);
-    vec3 crossAxis = cross(yAxis, ray.direction.xyz);
-    vec3 rot = yAxis * (dot(yAxis, ray.direction.xyz)) - cos(iTime) * cross(crossAxis, yAxis) + sin(iTime) * crossAxis;
- 
-    return texture(iChannel0, rot);
-}
-
-
-//------------------------------------------------------------
-// SHADERTOY MAIN
-
-// mainImage: process the current pixel (exactly one call per pixel)
-//    fragColor: output final color for current pixel
-//    fragCoord: input location of current pixel in image (in pixels)
-void mainImage(out color4 fragColor, in sCoord fragCoord)
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     // viewing plane (viewport) inputs
-    const sBasis eyePosition = sBasis(0.0);
-    const sScalar viewportHeight = 2.0, focalLength = 1.5;
+    const vec3 eyePosition = vec3(0.0);
+    const float viewportHeight = 2.0, focalLength = 1.5;
     
     // viewport info
     sViewport vp;
@@ -45,5 +13,6 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     // render
     initViewport(vp, viewportHeight, focalLength, fragCoord, iResolution.xy);
     initRayPersp(ray, eyePosition, vp.viewportPoint.xyz);
-    fragColor += calcColor(vp, ray);
+    
+    fragColor = texture(iChannel0, ray.direction.xyz);
 }
