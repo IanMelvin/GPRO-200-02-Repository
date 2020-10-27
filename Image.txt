@@ -1,60 +1,11 @@
 /*
 	Ian Melvin
 	Midterm
-	Purpose: Using Lab as a base, implement more chapters of Peter Shirley's Ray Tracing in one weekend
+	File: Image
+	Purpose: Using Lab 3 as a base, implement chapters 8, 9, and 12 of Peter Shirley's Ray Tracing in one weekend
 		https://raytracing.github.io/books/RayTracingInOneWeekend.html#rays,asimplecamera,andbackground
 
 */
-
-//Declaration of struct
-//inspired on hit_record from Peter Shirley (Link in header)
-struct hit_record{
-  	vec3 point;
-    vec3 normal;
-    float temp;
-    bool front_face;
-};
-
-//Declaration of struct
-//inspired on sphere class from Peter Shirley (Link in header)
-struct sphere{
-	vec3 center;
-    float radius;
-};
-
-//Declaration of struct
-//inspired on camera class from Peter Shirley (Link in header)
-struct camera{
-    vec3 horizontal;
-    vec3 vertical;
-    vec3 lower_left_corner;
-};
-   
-//takes in two vec4, a vec3 and a hit_record and outs a modified hit_record
-//based on work by Peter Shirley (Link in header)
-void set_face_normal(vec4 rayDirection, vec4 rayOrigin, vec3 outward_normal, out hit_record rec)
-{
-    rec.front_face = dot(rayDirection.xyz, outward_normal) < 0.0;
-    if(rec.front_face)
-    {
-        rec.normal = outward_normal;
-    }
-    else 
-    {
-     	rec.normal = -outward_normal;   
-    }    
-    
-}
-
-//takes in a camera, a vec4, and 3 floats and outs a modified camera
-//based on work by Peter Shirley (Link in header)
-void set_cam(out camera cam, vec4 origin, float viewportWidth, float viewportHeight, float focal_length)
-{
- 	cam.horizontal = vec3(viewportWidth, 0.0, 0.0);
-    cam.vertical = vec3(0.0, viewportHeight, 0.0);
-    cam.lower_left_corner = origin.xyz - cam.horizontal/2.0 - cam.vertical/2.0 - vec3(0.0, 0.0, focal_length);
-    
-}
 
 // Provided by Dan Buckstein
 // calcViewport: calculate the viewing plane (viewport) coordinate
@@ -188,7 +139,6 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin, in sphere sphereArray[2]
     float hit = 0.5 * (unitDirection.y + 1.0);
     
     return texture(iChannel0, uv);
-    //return mix(vec4(1.0), vec4(0.5, 0.7, 1.0, 1.0), hit);
 }
 
 //Based of of code given by https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
@@ -256,13 +206,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     
     float scale = 1.0 / samples_per_pixel;
     
-    //vec4 mixed = calcColor(rayDirection, rayOrigin, sphereArray);
-    
     mixed.x = clamp(mixed.x *= scale, 0.0, 0.999);
     mixed.y = clamp(mixed.y *= scale, 0.0, 0.999);
 	mixed.z = clamp(mixed.z *= scale, 0.0, 0.999);
 
     // color
     fragColor = mixed;
-	//fragColor = texture(iChannel0, uv);
 }

@@ -1,3 +1,16 @@
+/*
+	Ian Melvin
+	Midterm
+	File: Buffer A
+	Purpose: Using Lab 3 as a base, implement chapters 8, 9, and 12 of Peter Shirley's Ray Tracing in one weekend
+		https://raytracing.github.io/books/RayTracingInOneWeekend.html#rays,asimplecamera,andbackground
+
+*/
+
+// Modified by Ian Melvin based on work in previous labs
+// mainImage: process the current pixel (exactly one call per pixel)
+//    fragColor: output final color for current pixel
+//    fragCoord: input location of current pixel in image (in pixels)
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     // viewing plane (viewport) inputs
