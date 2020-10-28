@@ -116,32 +116,6 @@ bool hittable(vec4 rayDirection, vec4 rayOrigin, out float t_max, float t_min, o
     return hit_anything;
 }
 
-// Base Function by Dan Buckstein
-// Modified by Ian Melvin based on work by Peter Shirley (Link in header)
-// calcColor: calculate the color of a pixel given a ray
-//    rayDirection: input ray direction
-//    rayOrigin:    input ray origin
-vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin, in sphere sphereArray[2], vec2 uv)
-{
-    hit_record rec;
-    float t_max = 1.0 / 0.0; 
-    
-    bool store = hittable(rayDirection, rayOrigin, t_max, 0.0, rec, sphereArray[0]);
-    bool store2 = hittable(rayDirection, rayOrigin, t_max, 0.0, rec, sphereArray[1]);
-    
-    if(store || store2)
-    {
-        
-     	return 0.5 *(vec4(rec.normal, 1.0) + vec4(1.0));   
-    }
-    
-    vec4 unitDirection = unit_vector(rayDirection);
-    
-    float hit = 0.5 * (unitDirection.y + 1.0);
-    
-    return texture(iChannel0, uv);
-}
-
 //Based of of code given by https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
 float randomFloat(vec2 seed)
 {
@@ -153,11 +127,68 @@ float randomFloat(float minimun, float maximun, vec2 seed)
     return minimun + (maximun - minimun)*randomFloat(seed);
 }
 
-vec3 random(float minimun, float maximun, vec2 seed)
+//Takes in a light, three vec4s, a vec3, a float, and returns a vec4
+//Implementation of Lambertian Reflection
+//Brought over from Lab 4
+vec4 reflections(in lLight light, in vec4 rayDirection, in vec4 rayOrigin, in vec3 normal, in vec4 color, in float highexp)
 {
-	return vec3(randomFloat(minimun, maximun, seed), randomFloat(minimun, maximun, seed), randomFloat(minimun, maximun, seed));   
+ 	//Lambertian reflection
+    // Diffuse Coefficient
+    vec3 lVector = normalizer(light.center.xyz - rayDirection.xyz);
+   	float diffuseCoeff = maxDotProd(normal, lVector);
+        
+    // Attenuation  
+    // based on https://f.usemind.org/files/b/1/UseMind.ORG_comprehensive-tutorial-and-reference_2015__.pdf, Listing 13.30
+    float attenuation = light.intensity / (lengthSquared(rayDirection.xyz - lVector) + 1.0);
+        
+    // Diffuse intencity
+    vec4 diffuseIntencity = diffuseCoeff * color * light.color * attenuation;
+	
+    return diffuseIntencity * color * light.color;
 }
 
+// Base Function by Dan Buckstein
+// Modified by Ian Melvin based on work by Peter Shirley (Link in header)
+// calcColor: calculate the color of a pixel given a ray
+//    rayDirection: input ray direction
+//    rayOrigin:    input ray origin
+vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin, in sphere sphereArray[2], vec2 uv, vec2 fragCoord)
+{
+    hit_record rec;
+    float t_max = 1.0 / 0.0; 
+    
+    bool store = hittable(rayDirection, rayOrigin, t_max, 0.0, rec, sphereArray[0]);
+    bool store2 = hittable(rayDirection, rayOrigin, t_max, 0.0, rec, sphereArray[1]);
+    
+    //light
+    lLight light, light2, light3, light4;
+    initLight(light, vec3(0.0, 0.0, 300.0), vec4(1.0, 1.0, 1.0, 1.0), 10.0);
+    //initLight(light2, vec3(-200.0, 500.0, 150.0), vec4(0.5, 0.1, 0.2, 1.0), 10.0);
+    //initLight(light3, vec3(0.0, -50.0, 0.0), vec4(0.1, 0.8, 0.6, 1.0), 3.0);
+    //initLight(light4, vec3(-200.0, -200.0, -300.0), vec4(0.7, 0.3, 0.9, 1.0), 2.0);
+    
+    if(store)
+    {
+        vec4 color = 0.5 *(vec4(rec.normal, 1.0) + vec4(1.0));
+        
+        vec4 refColor = reflections(light, rayDirection, rayOrigin, rec.normal, color, 64.0);
+        //refColor += reflections(light2, rayDirection, rayOrigin, rec.normal, color, 24.0);
+        //refColor += reflections(light3, rayDirection, rayOrigin, rec.normal, color, 4.0);
+        //refColor += reflections(light4, rayDirection, rayOrigin, rec.normal, color, 128.0);
+        return 0.1*vec4(0.8, 0.4, 0.2, 1.0) + refColor;
+         
+    }
+    else if(store2)
+    {
+     	return 0.5 *(vec4(rec.normal, 1.0) + vec4(1.0));  
+    }
+    
+    //vec4 unitDirection = unit_vector(rayDirection);
+    
+    //float hit = 0.5 * (unitDirection.y + 1.0);
+    
+    return texture(iChannel0, uv);
+}
 
 // Provided by Dan Buckstein
 // Modified by Ian Melvin based on work by Peter Shirley (Link in header)
@@ -211,7 +242,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
         rayDirection = vec4(cam.lower_left_corner + u * cam.horizontal + v * cam.vertical, 0.0) - rayOrigin;
         calcRay(rayDirection, rayOrigin, viewport, focalLength);
         
-        mixed += calcColor(rayDirection, rayOrigin, sphereArray, uv);
+        mixed += calcColor(rayDirection, rayOrigin, sphereArray, uv, fragCoord);
         
     }
     

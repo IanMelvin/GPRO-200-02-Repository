@@ -34,6 +34,25 @@ struct camera{
     vec3 lower_left_corner;
 };
     
+//declaration for struct and struct variables
+//brought over from lab 4
+struct lLight
+{
+    vec4 center;
+    vec4 color;
+    float intensity;
+    
+};
+
+//Takes in a light, a vec3, a vec4, a float, and outs a light with instantiated values
+//brought over from lab 4
+void initLight(out lLight light, in vec3 center, in vec4 color, in float intensity)
+{
+ 	light.center = vec4(center,1.0);
+    light.color = color;
+    light.intensity = intensity;
+}
+    
 //takes in two vec4, a vec3 and a hit_record and outs a modified hit_record
 //based on work by Peter Shirley (Link in header)
 void set_face_normal(vec4 rayDirection, vec4 rayOrigin, vec3 outward_normal, out hit_record rec)
@@ -87,6 +106,20 @@ float lengthSquared(in vec3 x)
 float lengthSquared(in vec4 x)
 {
     return dot(x,x);
+}
+
+//Takes in two vec3s and returns the dot product of them but the bottom is capped at 0.0
+//brought over from lab 4
+float maxDotProd(vec3 vector1, vec3 vector2)
+{
+    return max(0.0, dot(vector1, vector2));
+}
+
+//Takes in a vec3 and returns the normalized vec3
+//brought over from lab 4
+vec3 normalizer(vec3 vector)
+{
+    return vector * (1.0 / length(vector));
 }
 
 
