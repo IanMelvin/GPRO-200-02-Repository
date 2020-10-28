@@ -15,6 +15,7 @@
 struct hit_record{
   	vec3 point;
     vec3 normal;
+    bool material;
     float temp;
     bool front_face;
 };
@@ -23,6 +24,7 @@ struct hit_record{
 //inspired on sphere class from Peter Shirley (Link in header)
 struct sphere{
 	vec3 center;
+    bool material;
     float radius;
 };
 
@@ -43,7 +45,15 @@ struct lLight
     float intensity;
     
 };
+    
+struct material
+{
+	vec4 color;
+    bool mat;
+};
 
+
+    
 //Takes in a light, a vec3, a vec4, a float, and outs a light with instantiated values
 //brought over from lab 4
 void initLight(out lLight light, in vec3 center, in vec4 color, in float intensity)
