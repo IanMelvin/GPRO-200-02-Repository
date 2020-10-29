@@ -194,7 +194,7 @@ vec4 colorValue(out rRay ray, sphere sphereArray[5], out bool again, vec2 uv, ou
     
     float hit = 0.5 * (unitDirection.y + 1.0);
     
-    return mix(vec4(1.0), vec4(0.5, 0.7, 1.0, 1.0), hit);   
+    return mix(vec4(1.0), vec4(0.6, 0.2, 1.0, 1.0), hit);   
     
 }
 
@@ -314,7 +314,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     fill_sphere(spr2, vec3(0.0, -100.5, -1.0), 100.0, 1.0, vec4(0.8, 0.8, 0.0, 1.0), 0.0, fragCoord);
     fill_sphere(spr3, vec3(-1.0, 0.0, -1.0), 0.5, 2.0, vec4(0.8, 0.8, 0.8, 1.0), 0.0, fragCoord);
     fill_sphere(spr4, vec3(1.0, 0.0, -1.0), 0.5, 2.0, vec4(0.8, 0.4, 0.2, 1.0), 0.3, fragCoord);
-    fill_sphere(spr0, vec3(5.0, 50.0, 80.5), 100.0, 0.0, texture(iChannel0, uv), 0.0, fragCoord);
+    fill_sphere(spr0, vec3(5.0, 50.0, 90.5), 100.0, 0.0, texture(iChannel0, uv), 0.0, fragCoord);
     
 	//sphere array
     sphere sphereArray[5] = sphere[5](spr0, spr1, spr2, spr3, spr4);
