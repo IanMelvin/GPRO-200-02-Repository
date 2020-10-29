@@ -43,16 +43,16 @@ void calcViewport(out vec2 viewport, out vec2 ndc, out vec2 uv,
 //    rayOrigin:    output origin point of ray
 //    viewport:     input viewing plane coordinate (use above function to calculate)
 //    focalLength:  input distance to viewing plane
-void calcRay(out vec4 rayDirection, out vec4 rayOrigin,
+void calcRay(out rRay ray,
              in vec2 viewport, in float focalLength)
 {
     // ray origin relative to viewer is the origin
     // w = 1 because it represents a point; can ignore when using
-    rayOrigin = vec4(0.0, 0.0, 0.0, 1.0);
+    ray.rayOrigin = vec4(0.0, 0.0, 0.0, 1.0);
 
     // ray direction relative to origin is based on viewing plane coordinate
     // w = 0 because it represents a direction; can ignore when using
-    rayDirection = vec4(viewport.x, viewport.y, -focalLength, 0.0);
+    ray.rayDirection = vec4(viewport.x, viewport.y, -focalLength, 0.0);
 }
 
 
@@ -60,11 +60,11 @@ void calcRay(out vec4 rayDirection, out vec4 rayOrigin,
 //Takes in a vec3, two vec4s, three floats, and a hit_record and returns a boolean and outs a hit_record
 //Determines if a sphere is hit
 //based on work by Peter Shirley (Link in header)
-bool hit(sphere spr, vec4 rayDirection, vec4 rayOrigin, float t_max, float t_min, out hit_record rec)
+bool hit(sphere spr, rRay ray, float t_max, float t_min, out hit_record rec)
 {
-	vec3 originToCenter =  rayOrigin.xyz - spr.center;
-    float len2 = lengthSquared(rayDirection);
-    float component = dot(originToCenter, rayDirection.xyz);
+	vec3 originToCenter =  ray.rayOrigin.xyz - spr.center;
+    float len2 = lengthSquared(ray.rayDirection);
+    float component = dot(originToCenter, ray.rayDirection.xyz);
     float ocMinusRadSqred = lengthSquared(originToCenter) - spr.radius*spr.radius;
     float discriminant = component*component - len2*ocMinusRadSqred;
     if(discriminant > 0.0)
@@ -76,10 +76,11 @@ bool hit(sphere spr, vec4 rayDirection, vec4 rayOrigin, float t_max, float t_min
         if(temp < t_max && temp > t_min)
         {
          	rec.temp = temp;
-            rec.point = rayOrigin.xyz + ( rec.temp * rayDirection.xyz );
+            rec.point = ray.rayOrigin.xyz + ( rec.temp * ray.rayDirection.xyz );
             vec3 outward_normal = (rec.point - spr.center) / spr.radius;
-            set_face_normal(rayDirection, rayOrigin, outward_normal, rec);
-            rec.material = spr.material;
+            set_face_normal(ray, outward_normal, rec);
+            rec.material = spr.material.mat;
+            rec.color = spr.material.color;
             
             return true;
         }
@@ -88,10 +89,10 @@ bool hit(sphere spr, vec4 rayDirection, vec4 rayOrigin, float t_max, float t_min
         if(temp < t_max && temp > t_min)
         {
          	rec.temp = temp;
-            rec.point = rayOrigin.xyz + ( rec.temp * rayDirection.xyz );
+            rec.point = ray.rayOrigin.xyz + ( rec.temp * ray.rayDirection.xyz );
             vec3 outward_normal = (rec.point - spr.center) / spr.radius;
-            set_face_normal(rayDirection, rayOrigin, outward_normal, rec);
-            rec.material = spr.material;
+            set_face_normal(ray, outward_normal, rec);
+            rec.material = spr.material.mat;
             
             return true;
         }
@@ -103,18 +104,21 @@ bool hit(sphere spr, vec4 rayDirection, vec4 rayOrigin, float t_max, float t_min
 
 //Takes in two vec4s, two floats and a sphere. Returns a bool, and outs a hit_record and a float
 //based on work by Peter Shirley (Link in header)
-bool hittable(vec4 rayDirection, vec4 rayOrigin, out float t_max, float t_min, out hit_record rec, sphere spr)
+bool hittable(rRay ray, out float t_max, float t_min, out hit_record rec, sphere sphereArray[3])
 {
     hit_record temp_rec;
     bool hit_anything = false; 
     
-    if(hit(spr, rayDirection, rayOrigin, t_max, t_min, temp_rec))
+    for(int i = 0; i < 3; i++)
     {
-      	hit_anything = true;
-        t_max = temp_rec.temp;
-        rec = temp_rec;
+        if(hit(sphereArray[i], ray, t_max, t_min, temp_rec))
+    	{
+      		hit_anything = true;
+        	t_max = temp_rec.temp;
+        	rec = temp_rec;
+    	}
     }
-    
+   
     return hit_anything;
 }
 
@@ -129,31 +133,76 @@ float randomFloat(float minimun, float maximun, vec2 seed)
     return minimun + (maximun - minimun)*randomFloat(seed);
 }
 
-//Takes in a light, three vec4s, a vec3, a float, and returns a vec4
-//Implementation of Lambertian Reflection
-//Brought over from Lab 4
-vec4 reflections(in lLight light, in vec4 rayDirection, in vec4 rayOrigin, in vec3 normal, in vec4 color, in float highexp)
+vec3 random_unit_vector(vec2 fragCoord)
 {
- 	//Lambertian reflection
-    // Diffuse Coefficient
-    vec3 lVector = normalizer(light.center.xyz - rayDirection.xyz);
-   	float diffuseCoeff = maxDotProd(normal, lVector);
-        
-    // Attenuation  
-    // based on https://f.usemind.org/files/b/1/UseMind.ORG_comprehensive-tutorial-and-reference_2015__.pdf, Listing 13.30
-    float attenuation = light.intensity / (lengthSquared(rayDirection.xyz - lVector) + 1.0);
-        
-    // Diffuse intencity
-    vec4 diffuseIntencity = diffuseCoeff * color * light.color * attenuation;
-	
-    return diffuseIntencity * color * light.color;
+ 	float a = randomFloat(0.0, 2.0 * 3.1415926535897932385, fragCoord);
+    float z = randomFloat(-1.0, 1.0, fragCoord);
+    float r = sqrt(1.0 - z*z);
+    return vec3(r*cos(a), r*sin(a), z);
 }
 
-bool scatterMetal(vec4 rayDirection, vec4 rayOrigin, vec4 color, hit_record rec)
+bool scatterMetal(rRay ray, out vec4 color, hit_record rec, out rRay scattered)
 {
-    vec3 reflected = reflect(unit_vector(rayDirection.xyz), rec.normal);
-    
+    vec3 reflected = reflect(unit_vector(ray.rayDirection.xyz), rec.normal);
+    scattered.rayOrigin = vec4(rec.point, 0.0);
+    scattered.rayDirection = vec4(reflected, 0.0);
+    color = rec.color;
+    return (dot(scattered.rayDirection, vec4(rec.normal, 0.0)) > 0.0);
+}
+
+bool scatterLam(rRay ray, out vec4 color, hit_record rec, out rRay scattered, vec2 fragCoord)
+{
+    vec3 scattered_direction = rec.normal + random_unit_vector(fragCoord);
+    scattered.rayOrigin = vec4(rec.point, 1.0);
+    scattered.rayDirection = vec4(scattered_direction, 1.0);
+    color = rec.color;
     return true;
+}
+
+vec4 colorValue(out rRay ray, sphere sphereArray[3], out bool again, vec2 uv, out int depth, hit_record rec, vec2 fragCoord)
+{
+    float t_max = 1.0 / 0.0;
+    again = false;
+    depth--;
+    
+    if(depth <= 0)
+    {
+    	return vec4(0.0, 0.0, 0.0, 1.0);
+    }
+    
+    else if (hittable(ray, t_max, 0.001, rec, sphereArray))
+    {
+        rRay scattered = ray;
+    	vec4 attenuation, mutliatten = vec4(1.0);
+        if(rec.material == 1.0)
+        {
+            if(scatterLam(ray, attenuation, rec, scattered, fragCoord))
+            {
+                ray = scattered;
+            	again = true;
+                return attenuation;   
+            }
+            return vec4(0.0, 0.0, 0.0, 0.0);
+        }
+        else if(rec.material == 2.0)
+        {
+            if(scatterMetal(ray, attenuation, rec, scattered))
+            {
+                ray = scattered;
+                again = true;
+            	return attenuation;   
+            }
+            return vec4(0.0, 0.0, 0.0, 0.0);
+        }
+    }
+    
+    //return texture(iChannel0, uv);
+    vec4 unitDirection = unit_vector(ray.rayDirection);
+    
+    float hit = 0.5 * (unitDirection.y + 1.0);
+    
+    return mix(vec4(1.0), vec4(0.5, 0.7, 1.0, 1.0), hit);   
+    
 }
 
 // Base Function by Dan Buckstein
@@ -161,42 +210,20 @@ bool scatterMetal(vec4 rayDirection, vec4 rayOrigin, vec4 color, hit_record rec)
 // calcColor: calculate the color of a pixel given a ray
 //    rayDirection: input ray direction
 //    rayOrigin:    input ray origin
-vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin, in sphere sphereArray[2], vec2 uv, vec2 fragCoord)
+vec4 calcColor(rRay ray, sphere sphereArray[3], vec2 uv, vec2 fragCoord)
 {
     hit_record rec;
-    float t_max = 1.0 / 0.0; 
+    int depth = 50;
+    bool loop = true;
     
-    bool store = hittable(rayDirection, rayOrigin, t_max, 0.0, rec, sphereArray[0]);
-    bool store2 = hittable(rayDirection, rayOrigin, t_max, 0.0, rec, sphereArray[1]);
+    vec4 store = colorValue(ray, sphereArray, loop,  uv, depth, rec, fragCoord);
     
-    //light
-    lLight light, light2, light3, light4;
-    initLight(light, vec3(0.0, 0.0, 300.0), vec4(1.0, 1.0, 1.0, 1.0), 10.0);
-    //initLight(light2, vec3(-200.0, 500.0, 150.0), vec4(0.5, 0.1, 0.2, 1.0), 10.0);
-    //initLight(light3, vec3(0.0, -50.0, 0.0), vec4(0.1, 0.8, 0.6, 1.0), 3.0);
-    //initLight(light4, vec3(-200.0, -200.0, -300.0), vec4(0.7, 0.3, 0.9, 1.0), 2.0);
-    
-    if(store)
+    while(loop)
     {
-        vec4 color = 0.5 *(vec4(rec.normal, 1.0) + vec4(1.0));
-        
-        vec4 refColor = reflections(light, rayDirection, rayOrigin, rec.normal, color, 64.0);
-        //refColor += reflections(light2, rayDirection, rayOrigin, rec.normal, color, 24.0);
-        //refColor += reflections(light3, rayDirection, rayOrigin, rec.normal, color, 4.0);
-        //refColor += reflections(light4, rayDirection, rayOrigin, rec.normal, color, 128.0);
-        return 0.1*vec4(0.8, 0.4, 0.2, 1.0) + refColor;
-         
-    }
-    else if(store2)
-    {
-     	return 0.5 *(vec4(rec.normal, 1.0) + vec4(1.0));  
+    	store *= colorValue(ray, sphereArray, loop,  uv, depth, rec, fragCoord);
     }
     
-    //vec4 unitDirection = unit_vector(rayDirection);
-    
-    //float hit = 0.5 * (unitDirection.y + 1.0);
-    
-    return texture(iChannel0, uv);
+    return store;
 }
 
 // Provided by Dan Buckstein
@@ -219,27 +246,34 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     //sphere info
     sphere spr1;
     sphere spr2;
+    sphere spr3;
     
     spr1.center = vec3(0.0, 0.0, -1.0);
     spr2.center = vec3(0.0, -100.5, -1.0);
+    spr3.center = vec3(-1.0, 0.0, -1.0);
     
     spr1.radius = 0.5;
     spr2.radius = 100.0;
+    spr3.radius = 0.5;
     
-    spr1.material = true;
-    spr2.material = false;
+    spr1.material.mat = 1.0;
+    spr1.material.color = vec4(0.5, 0.3, 0.8, 1.0);
+    spr2.material.mat = 1.0;
+    spr2.material.color = vec4(0.2, 0.6, 0.4, 1.0);
+    spr3.material.mat = 2.0;
+    spr3.material.color = vec4(0.8, 0.8, 0.8, 1.0);
     
 	//sphere array
-    sphere sphereArray[2] = sphere[2](spr1, spr2);
+    sphere sphereArray[3] = sphere[3](spr1, spr2, spr3);
 
     // ray
     vec4 rayDirection, rayOrigin;
+    rRay ray;
 
     // setup
     calcViewport(viewport, ndc, uv, aspect, resolutionInv,
                  viewportHeight, fragCoord, iResolution.xy);
-    calcRay(rayDirection, rayOrigin,
-            viewport, focalLength);
+    calcRay(ray, viewport, focalLength);
     
    	set_cam(cam, rayOrigin, aspect*viewportHeight, viewportHeight, focalLength);
     
@@ -252,9 +286,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
         float u = (fragCoord.x + randomFloat(fragCoord)) / ((viewportHeight * aspect) - 1.0);
         float v = (fragCoord.x + randomFloat(fragCoord)) / (viewportHeight - 1.0);
         rayDirection = vec4(cam.lower_left_corner + u * cam.horizontal + v * cam.vertical, 0.0) - rayOrigin;
-        calcRay(rayDirection, rayOrigin, viewport, focalLength);
+        calcRay(ray, viewport, focalLength);
         
-        mixed += calcColor(rayDirection, rayOrigin, sphereArray, uv, fragCoord);
+        mixed += calcColor(ray, sphereArray, uv, fragCoord);
         
     }
     

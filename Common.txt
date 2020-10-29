@@ -1,10 +1,3 @@
-/*
-	Ian Melvin
-	Midterm
-	File: Common
-	Purpose: Using Lab 3 as a base, implement chapters 8, 9, and 12 of Peter Shirley's Ray Tracing in one weekend
-		https://raytracing.github.io/books/RayTracingInOneWeekend.html#rays,asimplecamera,andbackground
-
 */
 
 //------------------------------------------------------------
@@ -15,16 +8,24 @@
 struct hit_record{
   	vec3 point;
     vec3 normal;
-    bool material;
+    float material;
+    vec4 color;
     float temp;
     bool front_face;
+};
+    
+struct mMaterial
+{
+	vec4 color;
+    float mat;
+    float fuzz;
 };
 
 //Declaration of struct
 //inspired on sphere class from Peter Shirley (Link in header)
 struct sphere{
 	vec3 center;
-    bool material;
+    mMaterial material;
     float radius;
 };
 
@@ -45,13 +46,12 @@ struct lLight
     float intensity;
     
 };
-    
-struct material
+      
+struct rRay
 {
-	vec4 color;
-    bool mat;
+ 	vec4 rayDirection;
+    vec4 rayOrigin;
 };
-
 
     
 //Takes in a light, a vec3, a vec4, a float, and outs a light with instantiated values
@@ -65,9 +65,9 @@ void initLight(out lLight light, in vec3 center, in vec4 color, in float intensi
     
 //takes in two vec4, a vec3 and a hit_record and outs a modified hit_record
 //based on work by Peter Shirley (Link in header)
-void set_face_normal(vec4 rayDirection, vec4 rayOrigin, vec3 outward_normal, out hit_record rec)
+void set_face_normal(rRay ray, vec3 outward_normal, out hit_record rec)
 {
-    rec.front_face = dot(rayDirection.xyz, outward_normal) < 0.0;
+    rec.front_face = dot(ray.rayDirection.xyz, outward_normal) < 0.0;
     if(rec.front_face)
     {
         rec.normal = outward_normal;
@@ -217,36 +217,27 @@ void initViewport(out sViewport vp,
 //------------------------------------------------------------
 // RAY INFO
 
-// sRay: ray data structure
-//	  origin: origin point in scene
-//    direction: direction vector in scene
-struct sRay
-{
-    vec4 origin;
-    vec4 direction;
-};
-
 // initRayPersp: initialize perspective ray
 //    ray: 		   output ray
 //    eyePosition: position of viewer in scene
 //    viewport:    input viewing plane offset
-void initRayPersp(out sRay ray,
+void initRayPersp(out rRay ray,
              	  in vec3 eyePosition, in vec3 viewport)
 {
     // ray origin relative to viewer is the origin
     // w = 1 because it represents a point; can ignore when using
-    ray.origin = asPoint(eyePosition);
+    ray.rayOrigin = asPoint(eyePosition);
 
     // ray direction relative to origin is based on viewing plane coordinate
     // w = 0 because it represents a direction; can ignore when using
-    ray.direction = asVector(viewport - eyePosition);
+    ray.rayDirection = asVector(viewport - eyePosition);
 }
 
 // initRayOrtho: initialize orthographic ray
 //    ray: 		   output ray
 //    eyePosition: position of viewer in scene
 //    viewport:    input viewing plane offset
-void initRayOrtho(out sRay ray,
+void initRayOrtho(out rRay ray,
              	  in vec3 eyePosition, in vec3 viewport)
 {
     // offset eye position to point on plane at the same depth

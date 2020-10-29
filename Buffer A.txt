@@ -21,11 +21,11 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     sViewport vp;
 
     // ray
-    sRay ray;
+    rRay ray;
     
     // render
     initViewport(vp, viewportHeight, focalLength, fragCoord, iResolution.xy);
     initRayPersp(ray, eyePosition, vp.viewportPoint.xyz);
     
-    fragColor = texture(iChannel0, ray.direction.xyz);
+    fragColor = texture(iChannel0, ray.rayDirection.xyz);
 }
