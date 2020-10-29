@@ -2,7 +2,7 @@
 	Ian Melvin
 	Midterm
 	File: Buffer A
-	Purpose: Using Lab 3 as a base, implement chapters 8, 9, and 12 of Peter Shirley's Ray Tracing in one weekend
+	Purpose: Using Lab 3 as a base, implement chapters 8, 9, 11 and 12 of Peter Shirley's Ray Tracing in one weekend
 		https://raytracing.github.io/books/RayTracingInOneWeekend.html#rays,asimplecamera,andbackground
 
 */
@@ -27,5 +27,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     initViewport(vp, viewportHeight, focalLength, fragCoord, iResolution.xy);
     initRayPersp(ray, eyePosition, vp.viewportPoint.xyz);
     
-    fragColor = texture(iChannel0, ray.rayDirection.xyz);
+    vec3 yAxis = vec3(0.0, 1.0, 0.0);
+    vec3 crossAxis = cross(yAxis, ray.rayDirection.xyz);
+    vec3 rot = yAxis * (dot(yAxis, ray.rayDirection.xyz)) - cos(iTime) * cross(crossAxis, yAxis) + sin(iTime) * crossAxis;
+ 
+    fragColor = texture(iChannel0, rot);
+    //fragColor = texture(iChannel0, ray.rayDirection.xyz);
 }

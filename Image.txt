@@ -2,7 +2,7 @@
 	Ian Melvin
 	Midterm
 	File: Image
-	Purpose: Using Lab 3 as a base, implement chapters 8, 9, and 12 of Peter Shirley's Ray Tracing in one weekend
+	Purpose: Using Lab 3 as a base, implement chapters 8, 9, 11 and 12 of Peter Shirley's Ray Tracing in one weekend
 		https://raytracing.github.io/books/RayTracingInOneWeekend.html#rays,asimplecamera,andbackground
 
 */
@@ -105,12 +105,12 @@ bool hit(sphere spr, rRay ray, float t_max, float t_min, out hit_record rec)
 
 //Takes in two vec4s, two floats and a sphere. Returns a bool, and outs a hit_record and a float
 //based on work by Peter Shirley (Link in header)
-bool hittable(rRay ray, out float t_max, float t_min, out hit_record rec, sphere sphereArray[4])
+bool hittable(rRay ray, out float t_max, float t_min, out hit_record rec, sphere sphereArray[5])
 {
     hit_record temp_rec;
     bool hit_anything = false; 
     
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < 5; i++)
     {
         if(hit(sphereArray[i], ray, t_max, t_min, temp_rec))
     	{
@@ -148,7 +148,7 @@ bool scatterLam(rRay ray, out vec4 color, hit_record rec, out rRay scattered, ve
 //Takes in one rRay, one array of spheres, one boolean, two vector twos, one int, and a hit_record
 //Returns a vec4, and outs a bool and a integer
 //based on work by Peter Shirley (Link in header)
-vec4 colorValue(out rRay ray, sphere sphereArray[4], out bool again, vec2 uv, out int depth, hit_record rec, vec2 fragCoord)
+vec4 colorValue(out rRay ray, sphere sphereArray[5], out bool again, vec2 uv, out int depth, hit_record rec, vec2 fragCoord)
 {
     float t_max = 1.0 / 0.0;
     again = false;
@@ -162,7 +162,7 @@ vec4 colorValue(out rRay ray, sphere sphereArray[4], out bool again, vec2 uv, ou
     else if (hittable(ray, t_max, 0.001, rec, sphereArray))
     {
         rRay scattered = ray;
-    	vec4 attenuation, mutliatten = vec4(1.0);
+    	vec4 attenuation;
         if(rec.material.mat == 1.0)
         {
             if(scatterLam(ray, attenuation, rec, scattered, fragCoord))
@@ -183,6 +183,10 @@ vec4 colorValue(out rRay ray, sphere sphereArray[4], out bool again, vec2 uv, ou
             }
             return vec4(0.0, 0.0, 0.0, 0.0);
         }
+        else if(rec.material.mat == 0.0)
+        {
+            return rec.material.color;
+        }
     }
     
     //return texture(iChannel0, uv);
@@ -199,7 +203,7 @@ vec4 colorValue(out rRay ray, sphere sphereArray[4], out bool again, vec2 uv, ou
 // calcColor: calculate the color of a pixel given a ray
 //    rayDirection: input ray direction
 //    rayOrigin:    input ray origin
-vec4 calcColor(rRay ray, sphere sphereArray[4], vec2 uv, vec2 fragCoord)
+vec4 calcColor(rRay ray, sphere sphereArray[5], vec2 uv, vec2 fragCoord)
 {
     hit_record rec;
     int depth = 50;
@@ -285,16 +289,23 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float aspect;
     const float viewportHeight = 2.0, focalLength = 1.0;
     
-    camera cam;
-    
     //Antialiasing
     const float samples_per_pixel = 100.0;
+    
+    // ray
+    rRay ray;
+    
+    // setup
+    calcViewport(viewport, ndc, uv, aspect, resolutionInv,
+                 viewportHeight, fragCoord, iResolution.xy);
+    calcRay(ray, viewport, focalLength);
     
     //sphere info
     sphere spr1;
     sphere spr2;
     sphere spr3;
     sphere spr4;
+    sphere spr0;
     
     vec4 mouseColor = vec4(clamp(iMouse.x / 1000.0, 0.0, 0.999), clamp(iMouse.y / 1000.0, 0.0, 0.999), 0.0, 1.0);
     
@@ -303,23 +314,19 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     fill_sphere(spr2, vec3(0.0, -100.5, -1.0), 100.0, 1.0, vec4(0.8, 0.8, 0.0, 1.0), 0.0, fragCoord);
     fill_sphere(spr3, vec3(-1.0, 0.0, -1.0), 0.5, 2.0, vec4(0.8, 0.8, 0.8, 1.0), 0.0, fragCoord);
     fill_sphere(spr4, vec3(1.0, 0.0, -1.0), 0.5, 2.0, vec4(0.8, 0.4, 0.2, 1.0), 0.3, fragCoord);
+    fill_sphere(spr0, vec3(5.0, 50.0, 80.5), 100.0, 0.0, texture(iChannel0, uv), 0.0, fragCoord);
     
 	//sphere array
-    sphere sphereArray[4] = sphere[4](spr1, spr2, spr3, spr4);
-
-    // ray
-    rRay ray;
-
-    // setup
-    calcViewport(viewport, ndc, uv, aspect, resolutionInv,
-                 viewportHeight, fragCoord, iResolution.xy);
-    calcRay(ray, viewport, focalLength);
+    sphere sphereArray[5] = sphere[5](spr0, spr1, spr2, spr3, spr4);
+    
+    //camera
+    camera cam;
     
     float dist = sqRoot(lengthSquared(spr1.center - vec3(0.0, 1.0, 0.0)));
     
     set_cam(cam, vec4(0.0, 0.0, 0.0, 0.0), spr1.center, vec3(0.0, 1.0, 0.0), 150.0, aspect, dist);
-    
-    //declare vector 3
+
+    //declare vector 4
     vec4 mixed;
 	
     //loop to collect 

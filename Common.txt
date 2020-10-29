@@ -73,6 +73,8 @@ void set_face_normal(rRay ray, vec3 outward_normal, out hit_record rec)
 }
 
 
+
+
 //------------------------------------------------------------
 // Helper Functions
 
