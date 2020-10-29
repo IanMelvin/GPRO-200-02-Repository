@@ -84,6 +84,11 @@ vec3 unit_vector(in vec3 vector)
  	   return vector / length(vector);
 }
 
+float sqRoot(float x)
+{
+ 	return sqrt(x);   
+}
+
 //Provided by Dan Buckstein during class
 //preforms the dot product on a vec3
 float lengthSquared(in vec3 x)

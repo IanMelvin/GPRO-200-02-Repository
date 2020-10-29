@@ -67,7 +67,7 @@ bool hit(sphere spr, rRay ray, float t_max, float t_min, out hit_record rec)
     float discriminant = component*component - len2*ocMinusRadSqred;
     if(discriminant > 0.0)
     {
-        float root = sqrt(discriminant);
+        float root = sqRoot(discriminant);
         	
         float temp = (-component - root) / len2;
          
@@ -300,7 +300,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
                  viewportHeight, fragCoord, iResolution.xy);
     calcRay(ray, viewport, focalLength);
     
-    float dist = sqrt(lengthSquared(spr2.center - vec3(0.0, 1.0, 0.0)));
+    float dist = length(spr2.center - vec3(0.0, 1.0, 0.0));
     
    	//set_cam(cam, ray.rayOrigin, aspect*viewportHeight, viewportHeight, focalLength);
     set_cam(cam, vec4(0.0,0.0,0.0, 1.0), spr2.center, vec3(0.0, 1.0, 0.0), 20.0, aspect, dist);
@@ -316,16 +316,15 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
         //ray.rayDirection = vec4(cam.lower_left_corner + u * cam.horizontal + v * cam.vertical, 0.0) - cam.origin;
         //ray.rayOrigin = cam.origin;
         //ray = getRay(cam, u, v, 2.0, fragCoord);
-        calcRay(ray, viewport, focalLength);
         
         mixed += calcColor(ray, sphereArray, uv, fragCoord);
     }
     
     float scale = 1.0 / samples_per_pixel;
     
-    mixed.x = clamp(mixed.x *= scale, 0.0, 0.999);
-    mixed.y = clamp(mixed.y *= scale, 0.0, 0.999);
-	mixed.z = clamp(mixed.z *= scale, 0.0, 0.999);
+    mixed.x = clamp(sqRoot(mixed.x * scale), 0.0, 0.999);
+    mixed.y = clamp(sqRoot(mixed.y * scale), 0.0, 0.999);
+	mixed.z = clamp(sqRoot(mixed.z * scale), 0.0, 0.999);
 
     // color
     fragColor = mixed;
