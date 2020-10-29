@@ -12,21 +12,19 @@
 
 //Declaration of struct
 //inspired on hit_record from Peter Shirley (Link in header)
-struct hit_record{
-  	vec3 point;
-    vec3 normal;
-    float material;
-    vec4 color;
-    float fuzz;
-    float temp;
-    bool front_face;
-};
-    
 struct mMaterial
 {
 	vec4 color;
     float mat;
     float fuzz;
+};
+
+struct hit_record{
+  	vec3 point;
+    vec3 normal;
+    mMaterial material;
+    float temp;
+    bool front_face;
 };
 
 //Declaration of struct

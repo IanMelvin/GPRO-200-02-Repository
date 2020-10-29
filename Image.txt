@@ -77,9 +77,9 @@ bool hit(sphere spr, rRay ray, float t_max, float t_min, out hit_record rec)
             rec.point = ray.rayOrigin.xyz + ( rec.temp * ray.rayDirection.xyz );
             vec3 outward_normal = (rec.point - spr.center) / spr.radius;
             set_face_normal(ray, outward_normal, rec);
-            rec.material = spr.material.mat;
-            rec.color = spr.material.color;
-            rec.fuzz = spr.material.fuzz;
+            rec.material.mat = spr.material.mat;
+            rec.material.color = spr.material.color;
+            rec.material.fuzz = spr.material.fuzz;
             
             return true;
         }
@@ -91,8 +91,9 @@ bool hit(sphere spr, rRay ray, float t_max, float t_min, out hit_record rec)
             rec.point = ray.rayOrigin.xyz + ( rec.temp * ray.rayDirection.xyz );
             vec3 outward_normal = (rec.point - spr.center) / spr.radius;
             set_face_normal(ray, outward_normal, rec);
-            rec.material = spr.material.mat;
-            rec.fuzz = spr.material.fuzz;
+            rec.material.mat = spr.material.mat;
+            rec.material.color = spr.material.color;
+            rec.material.fuzz = spr.material.fuzz;
             
             return true;
         }
@@ -126,8 +127,8 @@ bool scatterMetal(rRay ray, out vec4 color, hit_record rec, out rRay scattered, 
 {
     vec3 reflected = reflect(unit_vector(ray.rayDirection.xyz), rec.normal);
     scattered.rayOrigin = vec4(rec.point, 0.0);
-    scattered.rayDirection = vec4(reflected + (rec.fuzz * random_in_unit_sphere(fragCoord)), 0.0);
-    color = rec.color;
+    scattered.rayDirection = vec4(reflected + (rec.material.fuzz * random_in_unit_sphere(fragCoord)), 0.0);
+    color = rec.material.color;
     return (dot(scattered.rayDirection, vec4(rec.normal, 0.0)) > 0.0);
 }
 
@@ -136,7 +137,7 @@ bool scatterLam(rRay ray, out vec4 color, hit_record rec, out rRay scattered, ve
     vec3 scattered_direction = rec.normal + random_unit_vector(fragCoord);
     scattered.rayOrigin = vec4(rec.point, 1.0);
     scattered.rayDirection = vec4(scattered_direction, 1.0);
-    color = rec.color;
+    color = rec.material.color;
     return true;
 }
 
@@ -155,7 +156,7 @@ vec4 colorValue(out rRay ray, sphere sphereArray[4], out bool again, vec2 uv, ou
     {
         rRay scattered = ray;
     	vec4 attenuation, mutliatten = vec4(1.0);
-        if(rec.material == 1.0)
+        if(rec.material.mat == 1.0)
         {
             if(scatterLam(ray, attenuation, rec, scattered, fragCoord))
             {
@@ -165,7 +166,7 @@ vec4 colorValue(out rRay ray, sphere sphereArray[4], out bool again, vec2 uv, ou
             }
             return vec4(0.0, 0.0, 0.0, 0.0);
         }
-        else if(rec.material == 2.0)
+        else if(rec.material.mat == 2.0)
         {
             if(scatterMetal(ray, attenuation, rec, scattered, fragCoord))
             {
@@ -247,6 +248,15 @@ rRay getRay(camera cam, float u, float v, float aperture, vec2 fragCoord)
     return ray;
 }
 
+void fill_sphere(out sphere spr, vec3 center, float radius, float material, vec4 matColor, float fuzz, vec2 fragCoord)
+{
+    spr.center = center;
+    spr.radius = radius;
+    spr.material.mat = material;
+    spr.material.color = matColor;
+	spr.material.fuzz = fuzz;
+}
+
 // Provided by Dan Buckstein
 // Modified by Ian Melvin based on work by Peter Shirley (Link in header)
 // mainImage: process the current pixel (exactly one call per pixel)
@@ -270,29 +280,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     sphere spr3;
     sphere spr4;
     
-    spr1.center = vec3(0.0, 0.0, -1.0);
-    spr2.center = vec3(0.0, -100.5, -1.0);
-    spr3.center = vec3(-1.0, 0.0, -1.0);
-    spr4.center = vec3(1.0, 0.0, -1.0);
+    vec4 mouseColor = vec4(clamp(iMouse.x / 1000.0, 0.0, 0.999), clamp(iMouse.y / 1000.0, 0.0, 0.999), 0.0, 1.0);
     
-    spr1.radius = 0.5;
-    spr2.radius = 100.0;
-    spr3.radius = 0.5;
-    spr4.radius = 0.5;
-    
-    
-    spr1.material.mat = 1.0;
-    spr1.material.color = vec4(0.5, 0.3, 0.8, 1.0);
-    spr1.material.fuzz = 0.0;
-    spr2.material.mat = 1.0;
-    spr2.material.color = vec4(0.8, 0.8, 0.0, 1.0);
-    spr2.material.fuzz = 0.0;
-    spr3.material.mat = 2.0;
-    spr3.material.color = vec4(0.8, 0.8, 0.8, 1.0);
-    spr3.material.fuzz = 0.0;
-    spr4.material.mat = 2.0;
-    spr4.material.color = vec4(0.8, 0.4, 0.2, 1.0);
-    spr4.material.fuzz = 0.3;
+    fill_sphere(spr1, vec3(0.0, 0.0, -1.0), 0.5, 1.0, vec4(0.5, 0.3, 0.8, 1.0), 0.0, fragCoord);
+    fill_sphere(spr1, vec3(0.0, 0.0, -1.0), 0.5, 1.0, mouseColor, 0.0, fragCoord);
+    fill_sphere(spr2, vec3(0.0, -100.5, -1.0), 100.0, 1.0, vec4(0.8, 0.8, 0.0, 1.0), 0.0, fragCoord);
+    fill_sphere(spr3, vec3(-1.0, 0.0, -1.0), 0.5, 2.0, vec4(0.8, 0.8, 0.8, 1.0), 0.0, fragCoord);
+    fill_sphere(spr4, vec3(1.0, 0.0, -1.0), 0.5, 2.0, vec4(0.8, 0.4, 0.2, 1.0), 0.3, fragCoord);
     
 	//sphere array
     sphere sphereArray[4] = sphere[4](spr1, spr2, spr3, spr4);
@@ -309,7 +303,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float dist = sqrt(lengthSquared(spr2.center - vec3(0.0, 1.0, 0.0)));
     
    	//set_cam(cam, ray.rayOrigin, aspect*viewportHeight, viewportHeight, focalLength);
-    set_cam(cam, vec4(3.0,3.0,2.0, 1.0), spr2.center, vec3(0.0, 1.0, 0.0), 20.0, aspect, dist);
+    set_cam(cam, vec4(0.0,0.0,0.0, 1.0), spr2.center, vec3(0.0, 1.0, 0.0), 20.0, aspect, dist);
     
     //declare vector 3
     vec4 mixed;
@@ -319,6 +313,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     {
         float u = (fragCoord.x + randomFloat(fragCoord)) / ((viewportHeight * aspect) - 1.0);
         float v = (fragCoord.x + randomFloat(fragCoord)) / (viewportHeight - 1.0);
+        //ray.rayDirection = vec4(cam.lower_left_corner + u * cam.horizontal + v * cam.vertical, 0.0) - cam.origin;
+        //ray.rayOrigin = cam.origin;
         //ray = getRay(cam, u, v, 2.0, fragCoord);
         calcRay(ray, viewport, focalLength);
         
