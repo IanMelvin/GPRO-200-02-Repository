@@ -1,3 +1,10 @@
+/*
+	Ian Melvin
+	Midterm
+	File: Common
+	Purpose: Using Lab 3 as a base, implement chapters 8, 9, and 12 of Peter Shirley's Ray Tracing in one weekend
+		https://raytracing.github.io/books/RayTracingInOneWeekend.html#rays,asimplecamera,andbackground
+
 */
 
 //------------------------------------------------------------
@@ -10,6 +17,7 @@ struct hit_record{
     vec3 normal;
     float material;
     vec4 color;
+    float fuzz;
     float temp;
     bool front_face;
 };
