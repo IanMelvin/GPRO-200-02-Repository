@@ -104,12 +104,12 @@ bool hit(sphere spr, rRay ray, float t_max, float t_min, out hit_record rec)
 
 //Takes in two vec4s, two floats and a sphere. Returns a bool, and outs a hit_record and a float
 //based on work by Peter Shirley (Link in header)
-bool hittable(rRay ray, out float t_max, float t_min, out hit_record rec, sphere sphereArray[3])
+bool hittable(rRay ray, out float t_max, float t_min, out hit_record rec, sphere sphereArray[4])
 {
     hit_record temp_rec;
     bool hit_anything = false; 
     
-    for(int i = 0; i < 3; i++)
+    for(int i = 0; i < 4; i++)
     {
         if(hit(sphereArray[i], ray, t_max, t_min, temp_rec))
     	{
@@ -120,40 +120,6 @@ bool hittable(rRay ray, out float t_max, float t_min, out hit_record rec, sphere
     }
    
     return hit_anything;
-}
-
-//Based of of code given by https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
-float randomFloat(vec2 seed)
-{
-    return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
-
-float randomFloat(float minimun, float maximun, vec2 seed)
-{
-    return minimun + (maximun - minimun)*randomFloat(seed);
-}
-
-vec3 random(float minimun, float maximun, vec2 seed)
-{
-    return vec3(randomFloat(minimun, maximun, seed), randomFloat(minimun, maximun, seed), randomFloat(minimun, maximun, seed));
-}
-
-vec3 random_unit_vector(vec2 fragCoord)
-{
- 	float a = randomFloat(0.0, 2.0 * 3.1415926535897932385, fragCoord);
-    float z = randomFloat(-1.0, 1.0, fragCoord);
-    float r = sqrt(1.0 - z*z);
-    return vec3(r*cos(a), r*sin(a), z);
-}
-
-vec3 random_in_unit_sphere(vec2 fragCoord)
-{
- 	while(true)
-    {
-     	vec3 point = random(-1.0, 1.0, fragCoord);
-        if(lengthSquared(point) >= 1.0) continue;
-        return point;
-    }
 }
 
 bool scatterMetal(rRay ray, out vec4 color, hit_record rec, out rRay scattered, vec2 fragCoord)
@@ -174,7 +140,7 @@ bool scatterLam(rRay ray, out vec4 color, hit_record rec, out rRay scattered, ve
     return true;
 }
 
-vec4 colorValue(out rRay ray, sphere sphereArray[3], out bool again, vec2 uv, out int depth, hit_record rec, vec2 fragCoord)
+vec4 colorValue(out rRay ray, sphere sphereArray[4], out bool again, vec2 uv, out int depth, hit_record rec, vec2 fragCoord)
 {
     float t_max = 1.0 / 0.0;
     again = false;
@@ -225,7 +191,7 @@ vec4 colorValue(out rRay ray, sphere sphereArray[3], out bool again, vec2 uv, ou
 // calcColor: calculate the color of a pixel given a ray
 //    rayDirection: input ray direction
 //    rayOrigin:    input ray origin
-vec4 calcColor(rRay ray, sphere sphereArray[3], vec2 uv, vec2 fragCoord)
+vec4 calcColor(rRay ray, sphere sphereArray[4], vec2 uv, vec2 fragCoord)
 {
     hit_record rec;
     int depth = 50;
@@ -239,6 +205,46 @@ vec4 calcColor(rRay ray, sphere sphereArray[3], vec2 uv, vec2 fragCoord)
     }
     
     return store;
+}
+
+//takes in a camera, a vec4, and 3 floats and outs a modified camera
+//based on work by Peter Shirley (Link in header)
+void set_cam(out camera cam, vec4 origin, vec3 focusOn, vec3 vup, float vfov, float aRatio, float focusDist)
+{
+    float theta = dToRadians(vfov);
+    float viewportHeight = 2.0 * tan(theta * 0.5);
+    float viewportWidth = aRatio * viewportHeight;
+    
+    vec3 w = unit_vector(origin.xyz - focusOn);
+    cam.u = unit_vector(cross(vup, w));
+    cam.v = cross(w,cam.u);
+    
+    cam.origin = origin;
+ 	cam.horizontal = focusDist * viewportWidth * cam.u;
+    cam.vertical = focusDist * viewportHeight * cam.v;
+    cam.lower_left_corner = origin.xyz - cam.horizontal * 0.5 - cam.vertical * 0.5 - focusDist * w;
+}
+
+vec3 randomUnitDisk(vec2 fragCoord)
+{
+	while(true)
+    {
+     	vec3 point = vec3(randomFloat(-1.0, 1.0, fragCoord), randomFloat(-1.0, 1.0, fragCoord), 0.0);
+        if(lengthSquared(point) >= 1.0) continue;
+        return point;
+    }
+}
+
+rRay getRay(camera cam, float u, float v, float aperture, vec2 fragCoord)
+{
+    vec3 rd = aperture * 0.5 * randomUnitDisk(fragCoord);
+    vec3 offset = cam.u * rd.x + v * rd.y;
+    
+    rRay ray;
+    ray.rayOrigin = cam.origin + vec4(offset, 1.0);
+    ray.rayDirection = vec4(cam.lower_left_corner + u * cam.horizontal + v * cam.vertical, 1.0) - cam.origin + vec4(offset, 1.0);
+    
+    return ray;
 }
 
 // Provided by Dan Buckstein
@@ -262,14 +268,18 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     sphere spr1;
     sphere spr2;
     sphere spr3;
+    sphere spr4;
     
     spr1.center = vec3(0.0, 0.0, -1.0);
     spr2.center = vec3(0.0, -100.5, -1.0);
     spr3.center = vec3(-1.0, 0.0, -1.0);
+    spr4.center = vec3(1.0, 0.0, -1.0);
     
     spr1.radius = 0.5;
     spr2.radius = 100.0;
     spr3.radius = 0.5;
+    spr4.radius = 0.5;
+    
     
     spr1.material.mat = 1.0;
     spr1.material.color = vec4(0.5, 0.3, 0.8, 1.0);
@@ -279,10 +289,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     spr2.material.fuzz = 0.0;
     spr3.material.mat = 2.0;
     spr3.material.color = vec4(0.8, 0.8, 0.8, 1.0);
-    spr3.material.fuzz = 0.3;
+    spr3.material.fuzz = 0.0;
+    spr4.material.mat = 2.0;
+    spr4.material.color = vec4(0.8, 0.4, 0.2, 1.0);
+    spr4.material.fuzz = 0.3;
     
 	//sphere array
-    sphere sphereArray[3] = sphere[3](spr1, spr2, spr3);
+    sphere sphereArray[4] = sphere[4](spr1, spr2, spr3, spr4);
 
     // ray
     vec4 rayDirection, rayOrigin;
@@ -293,7 +306,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
                  viewportHeight, fragCoord, iResolution.xy);
     calcRay(ray, viewport, focalLength);
     
-   	set_cam(cam, rayOrigin, aspect*viewportHeight, viewportHeight, focalLength);
+    float dist = sqrt(lengthSquared(spr2.center - vec3(0.0, 1.0, 0.0)));
+    
+   	//set_cam(cam, ray.rayOrigin, aspect*viewportHeight, viewportHeight, focalLength);
+    set_cam(cam, vec4(3.0,3.0,2.0, 1.0), spr2.center, vec3(0.0, 1.0, 0.0), 20.0, aspect, dist);
     
     //declare vector 3
     vec4 mixed;
@@ -303,7 +319,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     {
         float u = (fragCoord.x + randomFloat(fragCoord)) / ((viewportHeight * aspect) - 1.0);
         float v = (fragCoord.x + randomFloat(fragCoord)) / (viewportHeight - 1.0);
-        rayDirection = vec4(cam.lower_left_corner + u * cam.horizontal + v * cam.vertical, 0.0) - rayOrigin;
+        //ray = getRay(cam, u, v, 2.0, fragCoord);
         calcRay(ray, viewport, focalLength);
         
         mixed += calcColor(ray, sphereArray, uv, fragCoord);
@@ -313,7 +329,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     
     mixed.x = clamp(mixed.x *= scale, 0.0, 0.999);
     mixed.y = clamp(mixed.y *= scale, 0.0, 0.999);
-    mixed.z = clamp(mixed.z *= scale, 0.0, 0.999);
+	mixed.z = clamp(mixed.z *= scale, 0.0, 0.999);
 
     // color
     fragColor = mixed;

@@ -40,19 +40,12 @@ struct sphere{
 //Declaration of struct
 //inspired on camera class from Peter Shirley (Link in header)
 struct camera{
+    vec4 origin;
     vec3 horizontal;
     vec3 vertical;
     vec3 lower_left_corner;
-};
-    
-//declaration for struct and struct variables
-//brought over from lab 4
-struct lLight
-{
-    vec4 center;
-    vec4 color;
-    float intensity;
-    
+    vec3 u;
+    vec3 v;
 };
       
 struct rRay
@@ -60,16 +53,6 @@ struct rRay
  	vec4 rayDirection;
     vec4 rayOrigin;
 };
-
-    
-//Takes in a light, a vec3, a vec4, a float, and outs a light with instantiated values
-//brought over from lab 4
-void initLight(out lLight light, in vec3 center, in vec4 color, in float intensity)
-{
- 	light.center = vec4(center,1.0);
-    light.color = color;
-    light.intensity = intensity;
-}
     
 //takes in two vec4, a vec3 and a hit_record and outs a modified hit_record
 //based on work by Peter Shirley (Link in header)
@@ -87,15 +70,6 @@ void set_face_normal(rRay ray, vec3 outward_normal, out hit_record rec)
     
 }
 
-//takes in a camera, a vec4, and 3 floats and outs a modified camera
-//based on work by Peter Shirley (Link in header)
-void set_cam(out camera cam, vec4 origin, float viewportWidth, float viewportHeight, float focal_length)
-{
- 	cam.horizontal = vec3(viewportWidth, 0.0, 0.0);
-    cam.vertical = vec3(0.0, viewportHeight, 0.0);
-    cam.lower_left_corner = origin.xyz - cam.horizontal/2.0 - cam.vertical/2.0 - vec3(0.0, 0.0, focal_length);
-    
-}
 
 //------------------------------------------------------------
 // Helper Functions
@@ -140,6 +114,44 @@ vec3 normalizer(vec3 vector)
     return vector * (1.0 / length(vector));
 }
 
+//Based of of code given by https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
+float randomFloat(vec2 seed)
+{
+    return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+float randomFloat(float minimun, float maximun, vec2 seed)
+{
+    return minimun + (maximun - minimun)*randomFloat(seed);
+}
+
+vec3 random(float minimun, float maximun, vec2 seed)
+{
+    return vec3(randomFloat(minimun, maximun, seed), randomFloat(minimun, maximun, seed), randomFloat(minimun, maximun, seed));
+}
+
+vec3 random_unit_vector(vec2 fragCoord)
+{
+ 	float a = randomFloat(0.0, 2.0 * 3.1415926535897932385, fragCoord);
+    float z = randomFloat(-1.0, 1.0, fragCoord);
+    float r = sqrt(1.0 - z*z);
+    return vec3(r*cos(a), r*sin(a), z);
+}
+
+vec3 random_in_unit_sphere(vec2 fragCoord)
+{
+ 	while(true)
+    {
+     	vec3 point = random(-1.0, 1.0, fragCoord);
+        if(lengthSquared(point) >= 1.0) continue;
+        return point;
+    }
+}
+
+float dToRadians(float degrees)
+{
+ 	return degrees * 3.1415926535897932385 / 180.0;   
+}
 
 // Provided by DANIEL S. BUCKSTEIN
 
