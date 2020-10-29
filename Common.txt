@@ -2,7 +2,7 @@
 	Ian Melvin
 	Midterm
 	File: Common
-	Purpose: Using Lab 3 as a base, implement chapters 8, 9, and 12 of Peter Shirley's Ray Tracing in one weekend
+	Purpose: Using Lab 3 as a base, implement chapters 8, 9, 11 and 12 of Peter Shirley's Ray Tracing in one weekend
 		https://raytracing.github.io/books/RayTracingInOneWeekend.html#rays,asimplecamera,andbackground
 
 */
@@ -11,7 +11,7 @@
 // struct declarations and assoicated functions
 
 //Declaration of struct
-//inspired on hit_record from Peter Shirley (Link in header)
+//inspired by the material class from Peter Shirley (Link in header)
 struct mMaterial
 {
 	vec4 color;
@@ -19,6 +19,8 @@ struct mMaterial
     float fuzz;
 };
 
+//Declaration of struct
+//inspired by hit_record from Peter Shirley (Link in header)
 struct hit_record{
   	vec3 point;
     vec3 normal;
@@ -28,7 +30,7 @@ struct hit_record{
 };
 
 //Declaration of struct
-//inspired on sphere class from Peter Shirley (Link in header)
+//inspired by sphere class from Peter Shirley (Link in header)
 struct sphere{
 	vec3 center;
     mMaterial material;
@@ -36,7 +38,7 @@ struct sphere{
 };
 
 //Declaration of struct
-//inspired on camera class from Peter Shirley (Link in header)
+//inspired by camera class from Peter Shirley (Link in header)
 struct camera{
     vec4 origin;
     vec3 horizontal;
@@ -45,7 +47,9 @@ struct camera{
     vec3 u;
     vec3 v;
 };
-      
+
+//Declaration of struct
+//inspired by ray class from Peter Shirley (Link in header)
 struct rRay
 {
  	vec4 rayDirection;
@@ -84,6 +88,7 @@ vec3 unit_vector(in vec3 vector)
  	   return vector / length(vector);
 }
 
+//Takes in a float and returns the squared root of said float
 float sqRoot(float x)
 {
  	return sqrt(x);   
@@ -117,22 +122,32 @@ vec3 normalizer(vec3 vector)
     return vector * (1.0 / length(vector));
 }
 
+//Takes in a vec2 and returns a float
 //Based of of code given by https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
 float randomFloat(vec2 seed)
 {
     return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
+//Takes in 2 floats and a vec2
+//Returns a float
+//based on work by Peter Shirley (Link in header)
 float randomFloat(float minimun, float maximun, vec2 seed)
 {
     return minimun + (maximun - minimun)*randomFloat(seed);
 }
 
+//Takes in 2 floats and a vec2
+//Returns a vec3
+//based on work by Peter Shirley (Link in header)
 vec3 random(float minimun, float maximun, vec2 seed)
 {
     return vec3(randomFloat(minimun, maximun, seed), randomFloat(minimun, maximun, seed), randomFloat(minimun, maximun, seed));
 }
 
+//Takes in a vec2
+//Returns a vec3
+//based on work by Peter Shirley (Link in header)
 vec3 random_unit_vector(vec2 fragCoord)
 {
  	float a = randomFloat(0.0, 2.0 * 3.1415926535897932385, fragCoord);
@@ -141,6 +156,9 @@ vec3 random_unit_vector(vec2 fragCoord)
     return vec3(r*cos(a), r*sin(a), z);
 }
 
+//Takes in a vec2
+//Returns a vec3
+//based on work by Peter Shirley (Link in header)
 vec3 random_in_unit_sphere(vec2 fragCoord)
 {
  	while(true)
@@ -151,6 +169,9 @@ vec3 random_in_unit_sphere(vec2 fragCoord)
     }
 }
 
+//Takes in 1 float, converts from degrees to radians
+//Returns a float
+//based on work by Peter Shirley (Link in header)
 float dToRadians(float degrees)
 {
  	return degrees * 3.1415926535897932385 / 180.0;   
