@@ -68,7 +68,7 @@ void main()
 	//lArr[1] = uModelMat * LightPosition2;
 	//lArr[2] = uModelMat * LightPosition3;
 	
-	//vec3 preColor = lightIng(lArr[0], LightIntensity, DiffuseReflectivity, norm_cam, eyeCoord);
+	//vec3 preColor = text.xyz * lightIng(lArr[0], LightIntensity, DiffuseReflectivity, norm_cam, eyeCoord);
 	//preColor += lightIng(lArr[1], LightIntensity2, DiffuseReflectivity2, norm_cam, eyeCoord);
 	//preColor += lightIng(lArr[2], LightIntensity3, DiffuseReflectivity3, norm_cam, eyeCoord);
 	
