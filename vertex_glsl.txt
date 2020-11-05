@@ -19,11 +19,16 @@ uniform vec4 LightPosition;
 uniform vec3 DiffuseReflectivity;
 uniform vec3 LightIntensity;
 
-//Varying 
+//Varying
 out vec4 vColor;
 out vec4 vPos;
 out vec4 vNormal;
 out vec4 vTexcoord;
+
+vec3 lightIng()
+{
+	return vec3(1.0);
+}
 
 void main()
 {	
@@ -31,19 +36,26 @@ void main()
 	//https://people.inf.elte.hu/plisaai/pdf/David%20Wolff%20-%20OpenGL%204.0%20Shading%20Language%20Cookbook%20(2).pdf
 	mat4 modelViewMat = uViewMat * uModelMat;
 	
-	mat3 normalMat = transpose(inverse(mat3(modelViewMat)));
-	vec3 norm_cam = normalMat * aNormal;
+	//View-Space
+	//mat3 normalMat = transpose(inverse(mat3(modelViewMat)));
+	//vec3 norm_cam = normalMat * aNormal;
+	//vec4 lightView = modelViewMat * LightPosition;
+	//vec4 eyeCoord = modelViewMat * aPosition;
 	
-	vec4 eyeCoord = modelViewMat * aPosition;
-	vec3 normDist = normalize(vec3(LightPosition-eyeCoord));
+	//Object-space
+	vec3 norm_cam = aNormal;
+	vec4 lightView = LightPosition;
+	vec4 eyeCoord = aPosition;
+	
+	vec3 normDist = normalize(vec3(lightView-eyeCoord));
 	vec3 preColor = LightIntensity * DiffuseReflectivity * max(dot(normDist, norm_cam), 0.0);
 	
 	//Per-vertex
 	vColor = vec4(preColor, 1.0);
 	
 	//Per-fragment
-	vColor = vec4(normDist, 0.0);
-	vNormal = vec4(norm_cam, 0.0);
+	//vColor = vec4(normDist, 0.0);
+	//vNormal = vec4(norm_cam, 0.0);
 	
 	gl_Position = uViewProjMat * uModelMat * aPosition;
 }
