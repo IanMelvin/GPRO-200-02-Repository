@@ -25,6 +25,8 @@ uniform vec4 LightPosition3;
 uniform vec3 LightIntensity3;
 uniform vec3 DiffuseReflectivity3;
 
+uniform sampler2D uTexmap;
+
 //Varying
 out vec4 vColor;
 out vec4 vPos[3];
@@ -39,6 +41,7 @@ vec3 lightIng(vec4 light_view, vec3 lInt, vec3 DiffRef, vec3 norm_cam, vec4 eyeC
 
 void main()
 {
+	vec4 text = texture(uTexmap, aTexcoord.xy);
 	//Based on pg.52 of David Wolff's OpenGL 4.0 Shading Language Cookbook
 	//https://people.inf.elte.hu/plisaai/pdf/David%20Wolff%20-%20OpenGL%204.0%20Shading%20Language%20Cookbook%20(2).pdf
 	mat4 modelViewMat = uViewMat * uModelMat;
@@ -57,9 +60,9 @@ void main()
 	lArr[2] = modelViewMat * LightPosition3;
 	
 	
-	vec3 preColor = lightIng(lArr[0], LightIntensity, DiffuseReflectivity, norm_cam, eyeCoord);
-	preColor += lightIng(lArr[1], LightIntensity2, DiffuseReflectivity2, norm_cam, eyeCoord);
-	preColor += lightIng(lArr[2], LightIntensity3, DiffuseReflectivity3, norm_cam, eyeCoord);
+	vec3 preColor = text.xyz * lightIng(lArr[0], LightIntensity, DiffuseReflectivity, norm_cam, eyeCoord);
+	preColor += text.xyz * lightIng(lArr[1], LightIntensity2, DiffuseReflectivity2, norm_cam, eyeCoord);
+	preColor += text.xyz * lightIng(lArr[2], LightIntensity3, DiffuseReflectivity3, norm_cam, eyeCoord);
 	
 	//Object space
 	//norm_cam = aNormal;
@@ -74,6 +77,7 @@ void main()
 	
 	vColor = vec4(preColor, 1.0);
 	
+	//vColor = text;
 	//Per-fragment
 	
 	//vColor = eyeCoord;
