@@ -14,10 +14,10 @@ uniform mat4 uViewMat;
 uniform mat4 uProjMat;
 uniform mat4 uViewProjMat;
 
-//Light uniforms
+//Light Uniforms
 uniform vec4 LightPosition;
-uniform float LightIntensity;
-uniform vec3 LightColor;
+uniform vec3 DiffuseReflectivity;
+uniform vec3 LightIntensity;
 
 //Varying 
 out vec4 vColor;
@@ -27,22 +27,23 @@ out vec4 vTexcoord;
 
 void main()
 {	
+	//Based on pg.52 of David Wolff's OpenGL 4.0 Shading Language Cookbook
+	//https://people.inf.elte.hu/plisaai/pdf/David%20Wolff%20-%20OpenGL%204.0%20Shading%20Language%20Cookbook%20(2).pdf
 	mat4 modelViewMat = uViewMat * uModelMat;
-	vec4 pos_clip = uProjMat * modelViewMat * aPosition;
+	
+	mat3 normalMat = transpose(inverse(mat3(modelViewMat)));
+	vec3 norm_cam = normalMat * aNormal;
 	
 	vec4 eyeCoord = modelViewMat * aPosition;
+	vec3 normDist = normalize(vec3(LightPosition-eyeCoord));
+	vec3 preColor = LightIntensity * DiffuseReflectivity * max(dot(normDist, norm_cam), 0.0);
 	
-	//Per Vertex
-	vec3 lVector = normalize(vec3(LightPosition - eyeCoord));
+	//Per-vertex
+	vColor = vec4(preColor, 1.0);
 	
-	float attenuation = LightIntensity / ( dot((eyeCoord.xyz-lVector),(eyeCoord.xyz-lVector)) + 1.0);
-	
-	vec3 preColor = LightColor * vec3(0.5, 0.4, 0.9) * attenuation * max(dot(lVector, pos_clip.xyz), 0.0);
-	//vColor = vec4(preColor, 1.0);
-	
-	//Per Fragment
-	vColor = eyeCoord;
-	vPos = pos_clip;
+	//Per-fragment
+	vColor = vec4(normDist, 0.0);
+	vNormal = vec4(norm_cam, 0.0);
 	
 	gl_Position = uViewProjMat * uModelMat * aPosition;
 }

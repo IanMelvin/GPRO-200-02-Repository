@@ -6,10 +6,10 @@ precision highp float;
 
 layout (location = 0) out vec4 rtFragColor;
 
-//Light uniforms
+//Light Uniforms
 uniform vec4 LightPosition;
-uniform float LightIntensity;
-uniform vec3 LightColor;
+uniform vec3 DiffuseReflectivity;
+uniform vec3 LightIntensity;
 
 //Varying
 in vec4 vColor;
@@ -19,16 +19,10 @@ in vec4 vTexcoord;
 
 void main()
 {
-	vec3 lVector = normalize(vec3(LightPosition - vColor));
-	
-	float attenuation = LightIntensity / ( dot((vColor.xyz-lVector),(vColor.xyz-lVector)) + 1.0);
-	
-	vec3 preColor = LightColor * vec3(0.5, 0.4, 0.9) * attenuation * max(dot(lVector, vPos.xyz), 0.0);
+	//Per-fragment
+	vec3 preColor = LightIntensity * DiffuseReflectivity * max(dot(vColor.xyz, vNormal.xyz), 0.0);
 	rtFragColor = vec4(preColor, 1.0);
-
-	//Per-vertex: input is final color
-	//rtFragColor = vColor;
 	
-	//Per-fragmemt: calc color using inputs
-	vec4 N = normalize(vNormal);
+	//Per-vertex
+	//rtFragColor = vColor;
 }
