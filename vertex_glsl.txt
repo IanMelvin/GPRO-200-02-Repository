@@ -79,6 +79,7 @@ void main()
 	//vColor = eyeCoord;
 	//vNormal = vec4(norm_cam,1.0);
 	//vPos = lArr;
+	//vTexcoord = text;
 	
 	
 	gl_Position = uViewProjMat * uModelMat * aPosition;
