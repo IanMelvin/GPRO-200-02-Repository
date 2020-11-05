@@ -16,58 +16,33 @@ uniform mat4 uViewProjMat;
 
 //Light uniforms
 uniform vec4 LightPosition;
-uniform vec3 DiffuseReflectivity;
-uniform vec3 LightIntensity;
+uniform float LightIntensity;
+uniform vec3 LightColor;
 
 //Varying 
 out vec4 vColor;
+out vec4 vPos;
 out vec4 vNormal;
 out vec4 vTexcoord;
 
 void main()
-{
-	//Position pipeline
+{	
 	mat4 modelViewMat = uViewMat * uModelMat;
 	vec4 pos_clip = uProjMat * modelViewMat * aPosition;
 	
 	vec4 eyeCoord = modelViewMat * aPosition;
-	vec3 s = normalize(vec3(LightPosition - eyeCoord));
 	
-	vec3 preColor = LightIntensity * DiffuseReflectivity * max(dot(s, pos_clip.xyz), 0.0);
-	vColor = vec4(preColor, 1.0);
-
+	//Per Vertex
+	vec3 lVector = normalize(vec3(LightPosition - eyeCoord));
+	
+	float attenuation = LightIntensity / ( dot((eyeCoord.xyz-lVector),(eyeCoord.xyz-lVector)) + 1.0);
+	
+	vec3 preColor = LightColor * vec3(0.5, 0.4, 0.9) * attenuation * max(dot(lVector, pos_clip.xyz), 0.0);
+	//vColor = vec4(preColor, 1.0);
+	
+	//Per Fragment
+	vColor = eyeCoord;
+	vPos = pos_clip;
+	
 	gl_Position = uViewProjMat * uModelMat * aPosition;
-
-	//vec4 pos_world = uModelMat * aPosition;
-	//vec4 pos_clip = uViewProjMat * pos_world;
-	//gl_Position = pos_clip;
-	
-	//Position pipeline
-	//mat4 modelViewMat = uViewMat * uModelMat;
-	//vec4 pos_clip = uProjMat * modelViewMat * aPosition;
-	
-	//gl_Position = pos_clip;
-	
-	//Normal pipeline
-	//mat3 normalMat = transpose(inverse(mat3(modelViewMat)));
-	//vec3 norm_camera = normalMat * aNormal;
-	
-	// Texcoord pipeline
-	//mat4 atlasMat = mat4(1.0, 0.0, 0.0, 0.0,
-	//					 0.0, 1.0, 0.0, 0.0,
-	//					 0.0, 0.0, 1.0, 0.0,
-	//					 0.25, 0.25, 0.0, 1.0);
-	//vec4 uv_atlas = atlasMat * aTexcoord;
-	
-	//Per-vertex: calc and output final color
-	//vColor = vec4(aNormal * 0.5 + 0.5, 1.0);
-	
-	//Per-fragment: pass needed values to PS
-	//vNormal = vec4(norm_camera, 0.0);
-	
-	//vTexcoord = uv_atlas;
-	
-	//gl_Position = uProjMat * modelViewMat * aTexcoord;
-	//vColor = vec4(1.0, 0.5, 0.0, 1.0);
-	//vColor = aPosition;
 }
