@@ -49,8 +49,6 @@ void main()
 	vec4 eyeCoord;
 	vec3 norm_cam;
 	
-	//Per-vertex
-	
 	//View Space
 	mat3 normalMat = transpose(inverse(mat3(modelViewMat)));
 	norm_cam = normalMat * aNormal;
@@ -59,10 +57,9 @@ void main()
 	lArr[1] = modelViewMat * LightPosition2;
 	lArr[2] = modelViewMat * LightPosition3;
 	
-	
 	vec3 preColor = text.xyz * lightIng(lArr[0], LightIntensity, DiffuseReflectivity, norm_cam, eyeCoord);
-	preColor += text.xyz * lightIng(lArr[1], LightIntensity2, DiffuseReflectivity2, norm_cam, eyeCoord);
-	preColor += text.xyz * lightIng(lArr[2], LightIntensity3, DiffuseReflectivity3, norm_cam, eyeCoord);
+	preColor += lightIng(lArr[1], LightIntensity2, DiffuseReflectivity2, norm_cam, eyeCoord);
+	preColor += lightIng(lArr[2], LightIntensity3, DiffuseReflectivity3, norm_cam, eyeCoord);
 	
 	//Object space
 	//norm_cam = aNormal;
@@ -75,11 +72,10 @@ void main()
 	//preColor += lightIng(lArr[1], LightIntensity2, DiffuseReflectivity2, norm_cam, eyeCoord);
 	//preColor += lightIng(lArr[2], LightIntensity3, DiffuseReflectivity3, norm_cam, eyeCoord);
 	
+	//Per-vertex
 	vColor = vec4(preColor, 1.0);
 	
-	//vColor = text;
 	//Per-fragment
-	
 	//vColor = eyeCoord;
 	//vNormal = vec4(norm_cam,1.0);
 	//vPos = lArr;
