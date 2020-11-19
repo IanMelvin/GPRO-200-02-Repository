@@ -1,5 +1,6 @@
 #version 300 es
-//Kernal 1 Pass
+//Luminance Pass
+//Ian Melvin
 layout (location = 0) in vec4 aPosition; 
 layout (location = 2) in vec4 aTexcoord; 
 
@@ -7,9 +8,9 @@ uniform mat4 uModelMat, uViewMat, uProjMat;
 
 out vec4 vTexcoord;
 
+//Passes aTexcoord to the PS with varying
 void main()
 {
-	vec4 clipspace = uProjMat * uViewMat * uModelMat * aPosition;
 	vTexcoord = aTexcoord;
 	
 	gl_Position = aPosition / aPosition.w;

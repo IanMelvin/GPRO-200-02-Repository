@@ -1,5 +1,6 @@
 #version 300 es
 //Display Pass
+//Ian Melvin
 layout (location = 0) in vec4 aPosition; 
 layout (location = 2) in vec2 aTexcoord; 
 
@@ -7,6 +8,7 @@ uniform mat4 uModelMat, uViewMat, uProjMat;
 
 out vec4 vTexcoord;
 
+//Converts aPosition to clipspace and passes it to the PS using varying
 void main()
 {
 	vec4 clipspace = uProjMat * uViewMat * uModelMat * aPosition;

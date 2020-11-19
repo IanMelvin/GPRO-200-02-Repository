@@ -1,5 +1,6 @@
 #version 300 es
 //Luminance Pass
+//Ian Melvin
 #ifdef GL_ES
 precision highp float;
 #endif //GL_ES
@@ -12,11 +13,14 @@ uniform sampler2D uTex;
 uniform vec2 uResolution;
 
 //Based on work from Lab 6
+//Calcs luminance of color
 float luminance(vec3 color)
 {
 	return 0.2126 * color.x + 0.7152 * color.y + 0.0722 * color.z;
 }
 
+//Based on work from Lab 6
+//Process fragments
 void main()
 {
 	float lumThreshHold = 0.75, invLumThresh = 1.0 / (1.0 - lumThreshHold);
@@ -25,5 +29,5 @@ void main()
 	vec4 image = texture(uTex, vTexcoord.xy);
 	vec4 color = image * clamp(luminance(image.xyz) - lumThreshHold, 0.0, 1.0) * invLumThresh;
 	
-	rtFragColor = color;
+	rtFragColor = image;
 }

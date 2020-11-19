@@ -1,5 +1,6 @@
 #version 300 es
 //Screen Pass
+//Ian Melvin
 layout (location = 0) in vec4 aPosition;
 layout (location = 1) in vec3 aNormal;
 
@@ -16,6 +17,9 @@ uniform vec4 LightPosition;
 uniform vec3 DiffuseReflectivity;
 uniform vec3 LightIntensity;
 
+//Based on work from Lab 7
+//Declares and passes the values needed to make the 
+//color for the geometry to the PS using varying
 void main()
 {
 	mat4 modelViewMat = uViewMat * uModelMat;
