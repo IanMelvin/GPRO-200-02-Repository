@@ -1,5 +1,5 @@
 #version 300 es
-//Kernal 2 Pass
+//Kernal Pass
 layout (location = 0) in vec4 aPosition; 
 layout (location = 2) in vec4 aTexcoord; 
 

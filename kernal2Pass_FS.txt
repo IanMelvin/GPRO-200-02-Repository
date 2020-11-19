@@ -1,5 +1,5 @@
 #version 300 es
-//Kernal 2 Pass
+//Kernal Pass
 #ifdef GL_ES
 precision highp float;
 #endif //GL_ES
@@ -9,10 +9,40 @@ layout (location = 0) out vec4 rtFragColor;
 in vec4 vTexcoord;
 
 uniform sampler2D uTex;
+uniform vec2 uResolution;
+
+//Based on work from Lab 6
+vec4 textures(vec2 uv, float weight)
+{
+	return texture(uTex, uv) * weight;
+}
+
+//Based on work from Lab 6
+vec2 uvCalc(vec2 upper, vec2 lower)
+{
+	return upper * lower;
+}
+
+//Based on work from Lab 6
+vec4 gausBlur(vec2 fragCoord, vec2 lowerUV, vec2 offset, float weight)
+{
+	vec4 sum = textures(uvCalc(fragCoord + offset, lowerUV), weight);
+	sum += textures(uvCalc(fragCoord - offset, lowerUV), weight);
+	return sum;
+}
 
 void main()
 {
-	vec4 color = texture(uTex, vTexcoord.xy);
+	float norm = 1.0/16.0;
+	vec2 uv = vTexcoord.xy, lowerUV = 1.0 / uResolution;
 
-	rtFragColor = color;
+	//Blur
+	vec2 fragCoord = gl_FragCoord.xy;
+	vec4 sum = texture(uTex, vTexcoord.xy) * 6.0;
+	sum += gausBlur(fragCoord, lowerUV, vec2(0.0, 1.0), 4.0f);
+	sum += gausBlur(fragCoord, lowerUV, vec2(0.0, 2.0), 1.0f);
+	sum += gausBlur(fragCoord, lowerUV, vec2(1.0, 0.0), 4.0f);
+	sum += gausBlur(fragCoord, lowerUV, vec2(2.0, 0.0), 1.0f);
+	
+	rtFragColor = sum * norm;
 }
