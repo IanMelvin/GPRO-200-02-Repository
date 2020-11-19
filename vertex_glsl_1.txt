@@ -1,0 +1,86 @@
+#version 300 es
+
+//Object-space
+layout (location = 0) in vec4 aPosition;
+layout (location = 1) in vec3 aNormal;
+
+//2D UV: texture coord
+//Texture space
+layout (location = 2) in vec4 aTexcoord;
+
+//Tranform Uniforms
+uniform mat4 uModelMat;
+uniform mat4 uViewMat;
+uniform mat4 uProjMat;
+uniform mat4 uViewProjMat;
+
+//Light Uniforms
+uniform vec4 LightPosition;
+uniform vec3 DiffuseReflectivity;
+uniform vec3 LightIntensity;
+uniform vec4 LightPosition2;
+uniform vec3 LightIntensity2;
+uniform vec3 DiffuseReflectivity2;
+uniform vec4 LightPosition3;
+uniform vec3 LightIntensity3;
+uniform vec3 DiffuseReflectivity3;
+
+uniform sampler2D uTexmap;
+
+//Varying
+out vec4 vColor;
+out vec4 vPos[3];
+out vec4 vNormal;
+out vec4 vTexcoord;
+
+vec3 lightIng(vec4 light_view, vec3 lInt, vec3 DiffRef, vec3 norm_cam, vec4 eyeCoord)
+{
+	vec3 normDist = normalize(vec3(light_view - eyeCoord));
+	return lInt * DiffRef * max(dot(normDist, norm_cam), 0.0);;
+}
+
+void main()
+{
+	vec4 text = texture(uTexmap, aTexcoord.xy);
+	//Based on pg.52 of David Wolff's OpenGL 4.0 Shading Language Cookbook
+	//https://people.inf.elte.hu/plisaai/pdf/David%20Wolff%20-%20OpenGL%204.0%20Shading%20Language%20Cookbook%20(2).pdf
+	mat4 modelViewMat = uViewMat * uModelMat;
+	vec4 lArr[3];
+	vec4 eyeCoord;
+	vec3 norm_cam;
+	
+	//View Space
+	mat3 normalMat = transpose(inverse(mat3(modelViewMat)));
+	norm_cam = normalMat * aNormal;
+	eyeCoord = modelViewMat * aPosition;	
+	lArr[0] = modelViewMat * LightPosition;
+	lArr[1] = modelViewMat * LightPosition2;
+	lArr[2] = modelViewMat * LightPosition3;
+	
+	vec3 preColor = text.xyz * lightIng(lArr[0], LightIntensity, DiffuseReflectivity, norm_cam, eyeCoord);
+	preColor += lightIng(lArr[1], LightIntensity2, DiffuseReflectivity2, norm_cam, eyeCoord);
+	preColor += lightIng(lArr[2], LightIntensity3, DiffuseReflectivity3, norm_cam, eyeCoord);
+	
+	//Object space
+	//norm_cam = aNormal;
+	//eyeCoord = aPosition;
+	//lArr[0] = uModelMat * LightPosition;
+	//lArr[1] = uModelMat * LightPosition2;
+	//lArr[2] = uModelMat * LightPosition3;
+	
+	//vec3 preColor = text.xyz * lightIng(lArr[0], LightIntensity, DiffuseReflectivity, norm_cam, eyeCoord);
+	//preColor += lightIng(lArr[1], LightIntensity2, DiffuseReflectivity2, norm_cam, eyeCoord);
+	//preColor += lightIng(lArr[2], LightIntensity3, DiffuseReflectivity3, norm_cam, eyeCoord);
+	
+	//Per-vertex
+	vColor = vec4(preColor, 1.0);
+	
+	//Per-fragment
+	//vColor = eyeCoord;
+	//vNormal = vec4(norm_cam,1.0);
+	//vPos = lArr;
+	//vTexcoord = text;
+	
+	
+	gl_Position = uViewProjMat * uModelMat * aPosition;
+}
