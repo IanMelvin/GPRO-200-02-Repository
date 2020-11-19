@@ -1,5 +1,5 @@
 #version 300 es
-//Kernal Pass
+//Luminance Pass
 //Ian Melvin
 #ifdef GL_ES
 precision highp float;
@@ -13,42 +13,21 @@ uniform sampler2D uTex;
 uniform vec2 uResolution;
 
 //Based on work from Lab 6
-//Pulls color from texture multiplied by weight
-vec4 textures(vec2 uv, float weight)
+//Calcs luminance of color
+float luminance(vec3 color)
 {
-	return texture(uTex, uv) * weight;
+	return 0.2126 * color.x + 0.7152 * color.y + 0.0722 * color.z;
 }
 
 //Based on work from Lab 6
-//Multiplies the values
-vec2 uvCalc(vec2 upper, vec2 lower)
-{
-	return upper * lower;
-}
-
-//Based on work from Lab 6
-//adds nearby pixels
-vec4 gausBlur(vec2 fragCoord, vec2 lowerUV, vec2 offset, float weight)
-{
-	vec4 sum = textures(uvCalc(fragCoord + offset, lowerUV), weight);
-	sum += textures(uvCalc(fragCoord - offset, lowerUV), weight);
-	return sum;
-}
-
-//Based on work from Lab 6
-//Processes fragments
+//Process fragments
 void main()
 {
-	float norm = 1.0/16.0;
-	vec2 uv = vTexcoord.xy, lowerUV = 1.0 / uResolution;
-
-	//Blur
-	vec2 fragCoord = gl_FragCoord.xy;
-	vec4 sum = texture(uTex, vTexcoord.xy) * 6.0;
-	sum += gausBlur(fragCoord, lowerUV, vec2(0.0, 1.0), 4.0f);
-	sum += gausBlur(fragCoord, lowerUV, vec2(0.0, 2.0), 1.0f);
-	sum += gausBlur(fragCoord, lowerUV, vec2(1.0, 0.0), 4.0f);
-	sum += gausBlur(fragCoord, lowerUV, vec2(2.0, 0.0), 1.0f);
+	float lumThreshHold = 0.75, invLumThresh = 1.0 / (1.0 - lumThreshHold);
 	
-	rtFragColor = sum * norm;
+	//Luminance
+	vec4 image = texture(uTex, vTexcoord.xy);
+	vec4 color = image * clamp(luminance(image.xyz) - lumThreshHold, 0.0, 1.0) * invLumThresh;
+	
+	rtFragColor = color;
 }

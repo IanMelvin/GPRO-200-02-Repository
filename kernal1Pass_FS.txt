@@ -29,5 +29,5 @@ void main()
 	vec4 image = texture(uTex, vTexcoord.xy);
 	vec4 color = image * clamp(luminance(image.xyz) - lumThreshHold, 0.0, 1.0) * invLumThresh;
 	
-	rtFragColor = image;
+	rtFragColor = color;
 }

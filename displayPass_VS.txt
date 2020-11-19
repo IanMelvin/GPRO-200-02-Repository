@@ -1,18 +1,33 @@
 #version 300 es
-//Display Pass
+//Luminance Pass
 //Ian Melvin
-layout (location = 0) in vec4 aPosition; 
-layout (location = 2) in vec2 aTexcoord; 
+#ifdef GL_ES
+precision highp float;
+#endif //GL_ES
 
-uniform mat4 uModelMat, uViewMat, uProjMat;
+layout (location = 0) out vec4 rtFragColor;
 
-out vec4 vTexcoord;
+in vec4 vTexcoord;
 
-//Converts aPosition to clipspace and passes it to the PS using varying
+uniform sampler2D uTex;
+uniform vec2 uResolution;
+
+//Based on work from Lab 6
+//Calcs luminance of color
+float luminance(vec3 color)
+{
+	return 0.2126 * color.x + 0.7152 * color.y + 0.0722 * color.z;
+}
+
+//Based on work from Lab 6
+//Process fragments
 void main()
 {
-	vec4 clipspace = uProjMat * uViewMat * uModelMat * aPosition;
-	vTexcoord = clipspace;
+	float lumThreshHold = 0.75, invLumThresh = 1.0 / (1.0 - lumThreshHold);
 	
-	gl_Position = aPosition;
+	//Luminance
+	vec4 image = texture(uTex, vTexcoord.xy);
+	vec4 color = image * clamp(luminance(image.xyz) - lumThreshHold, 0.0, 1.0) * invLumThresh;
+	
+	rtFragColor = color;
 }
