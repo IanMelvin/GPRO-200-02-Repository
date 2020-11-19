@@ -10,7 +10,7 @@ out vec4 vTexcoord;
 void main()
 {
 	vec4 clipspace = uProjMat * uViewMat * uModelMat * aPosition;
-	vTexcoord = aTexcoord / aTexcoord.w;
+	vTexcoord = aTexcoord;
 	
-	gl_Position = aPosition;
+	gl_Position = aPosition / aPosition.w;
 }

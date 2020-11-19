@@ -1,5 +1,5 @@
 #version 300 es
-//Kernal 1 Pass
+//Kernal 2 Pass
 #ifdef GL_ES
 precision highp float;
 #endif //GL_ES
