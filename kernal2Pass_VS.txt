@@ -1,0 +1,16 @@
+#version 300 es
+//Kernal 2 Pass
+layout (location = 0) in vec4 aPosition; 
+layout (location = 2) in vec4 aTexcoord; 
+
+uniform mat4 uModelMat, uViewMat, uProjMat;
+
+out vec4 vTexcoord;
+
+void main()
+{
+	vec4 clipspace = uProjMat * uViewMat * uModelMat * aPosition;
+	vTexcoord = aTexcoord / aTexcoord.w;
+	
+	gl_Position = aPosition;
+}
