@@ -1,0 +1,47 @@
+#version 300 es
+//Screen Pass
+#ifdef GL_ES
+precision highp float;
+#endif //GL_ES
+
+layout (location = 0) out vec4 rtFragColor;
+
+//Varying
+in vec4 vNormal;
+in vec4 vTexcoord;
+in vec4 vColor;
+in vec4 vPos;
+in vec4 vStandardC;
+
+//Uniforms
+uniform vec4 LightPosition;
+uniform vec3 DiffuseReflectivity;
+uniform vec3 LightIntensity;
+uniform sampler2D uTex;
+
+vec3 lightIng(vec4 light_view, vec3 lInt, vec3 DiffRef, vec3 norm_cam, vec4 eyeCoord)
+{
+	vec3 normDist = normalize(vec3(light_view - eyeCoord));
+	return lInt * DiffRef * max(dot(normDist, norm_cam), 0.0);;
+}
+
+void main()
+{
+	int option = 0;
+	if(option == 0)
+	{
+		rtFragColor = vStandardC;
+	}
+	else if(option == 1)
+	{
+		vec2 uv = vTexcoord.xy;
+		vec4 color = texture(uTex, uv);
+		rtFragColor = color;
+	}
+	else
+	{
+		//Per-fragment
+		vec3 preColor = vTexcoord.xyz * lightIng(vPos, LightIntensity, DiffuseReflectivity, vNormal.xyz, vColor);
+		rtFragColor = vec4(preColor, 1.0);
+	}
+}
