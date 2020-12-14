@@ -8,6 +8,9 @@ layout (triangle_strip) out;
 layout (max_vertices = 4) out;
 
 uniform mat4 uProjection;
+uniform mat4 uViewProjMat;
+uniform mat4 uModel;
+uniform mat4 uView;
 uniform float uParticleSize;
 
 in VERTEX
@@ -20,35 +23,41 @@ out vec4 vertex_Color;
 
 void main()
 {
-	vec4 p = gl_in[0].gl_Position;
+	mat4 MV = uView * uModel;
+	
+	vec3 right = vec3(MV[0][0], MV[1][0], MV[2][0]);
+	vec3 up = vec3(MV[0][1], MV[1][1], MV[2][1]);
+
+	vec3 p = gl_in[0].gl_Position.xyz;
 	
 	// a: left-bottom
-	vec2 va = p.xy + vec2(-0.5, -0.5) * uParticleSize;
-	gl_Position = uProjection * vec4(va, p.zw);
+	vec3 va = p - (right + up) * uParticleSize;
+	gl_Position = uViewProjMat * vec4(va, 1.0);
 	vertex_UV = vec2(0.0, 0.0);
 	vertex_Color = vertex[0].vColor;
 	EmitVertex();
 	
 	// b: left-top
-	vec2 vb = p.xy + vec2(-0.5, 0.5) * uParticleSize;
-	gl_Position = uProjection * vec4(vb, p.zw);
+	vec3 vb = p - (right - up) * uParticleSize;
+	gl_Position = uViewProjMat * vec4(vb, 1.0);
 	vertex_UV = vec2(0.0, 1.0);
 	vertex_Color = vertex[0].vColor;
 	EmitVertex();
 	
 	// d: right-bottom
-	vec2 vd = p.xy + vec2(0.5, -0.5) * uParticleSize;
-	gl_Position = uProjection * vec4(vd, p.zw);
+	vec3 vd = p + (right - up) * uParticleSize;
+	gl_Position = uViewProjMat * vec4(vd, 1.0);
 	vertex_UV = vec2(1.0, 0.0);
 	vertex_Color = vertex[0].vColor;
 	EmitVertex();
 	
 	// c: right-top
-	vec2 vc = p.xy + vec2(0.5, 0.5) * uParticleSize;
-	gl_Position = uProjection * vec4(vc, p.zw);
+	vec3 vc = p + (right + up) * uParticleSize;
+	gl_Position = uViewProjMat * vec4(vc, 1.0);
 	vertex_UV = vec2(1.0, 1.0);
 	vertex_Color = vertex[0].vColor;
 	EmitVertex();
 	
 	EndPrimitive();
+	
 }
