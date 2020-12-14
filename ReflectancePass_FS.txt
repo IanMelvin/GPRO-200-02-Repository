@@ -1,33 +1,15 @@
-#version 300 es
-//Luminance Pass
+#version 330
+//ReflectancePass
 //Ian Melvin
-#ifdef GL_ES
-precision highp float;
-#endif //GL_ES
+in vec4 color;
+in vec4 uv2;
+out vec4 outColor;
 
-layout (location = 0) out vec4 rtFragColor;
+uniform sampler2D two;
 
-in vec4 vTexcoord;
 
-uniform sampler2D uTex;
-uniform vec2 uResolution;
 
-//Based on work from Lab 6
-//Calcs luminance of color
-float luminance(vec3 color)
-{
-	return 0.2126 * color.x + 0.7152 * color.y + 0.0722 * color.z;
-}
-
-//Based on work from Lab 6
-//Process fragments
-void main()
-{
-	float lumThreshHold = 0.75, invLumThresh = 1.0 / (1.0 - lumThreshHold);
-	
-	//Luminance
-	vec4 image = texture(uTex, vTexcoord.xy);
-	vec4 color = image * clamp(luminance(image.xyz) - lumThreshHold, 0.0, 1.0) * invLumThresh;
-	
-	rtFragColor = color;
+void main() {
+    vec4 noiseVec = texture(two, uv2.xy);
+    outColor = noiseVec;
 }

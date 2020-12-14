@@ -1,17 +1,24 @@
-#version 300 es
-//Kernal Pass
+#version 330
+//ReflectancePass
 //Ian Melvin
-layout (location = 0) in vec4 aPosition; 
-layout (location = 2) in vec4 aTexcoord; 
+uniform mat4 matVP;
+uniform mat4 matGeo;
 
-uniform mat4 uModelMat, uViewMat, uProjMat;
+layout (location = 0) in vec4 pos;
+layout (location = 1) in vec3 normal;
+layout (location = 2) in vec4 uv;
 
-out vec4 vTexcoord;
+out vec4 color;
+out vec4 uv2;
 
-//Passes aTexcoord to the PS with varying
-void main()
+struct light
 {
-	vTexcoord = aTexcoord;
-	
-	gl_Position = aPosition / aPosition.w;
+	vec4 lightPosition;
+	vec3 diffuseReflectivity;
+	vec3 lightIntensity;
+};
+
+void main() {
+   uv2 = uv;
+   gl_Position = matVP * matGeo * pos;
 }
