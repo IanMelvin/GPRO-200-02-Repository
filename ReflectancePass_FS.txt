@@ -1,15 +1,43 @@
 #version 330
 //ReflectancePass
 //Ian Melvin
+
+layout (location = 0) out vec4 rtFragCoord;
+
 in vec4 color;
-in vec4 uv2;
-out vec4 outColor;
+in vec2 uv;
 
-uniform sampler2D two;
+in vec4 vNormal;
+in vec4 vTexcoord;
+in vec4 vColor;
+in vec4 vPos;
 
+struct light
+{
+	vec4 lightPosition;
+	vec3 diffuseReflectivity;
+	vec3 lightIntensity;
+};
 
+in light vLight;
+
+uniform sampler2D uTex;
+
+float maxDotProd(vec3 vector1, vec3 vector2)
+{
+	return max(dot(vector1,vector2), 0.0);
+}
+
+vec3 lightIng(vec4 light_view, vec3 lInt, vec3 DiffRef, vec3 norm_cam, vec4 eyeCoord)
+{
+	vec3 normDist = normalize(vec3(light_view-eyeCoord));
+	return lInt * DiffRef * maxDotProd(normDist, norm_cam);
+}
 
 void main() {
-    vec4 noiseVec = texture(two, uv2.xy);
-    outColor = noiseVec;
+	vec4 noiseVec = texture(uTex, vTexcoord.xy);
+	
+	vec3 preColor = vec3(.1, .5, .9) * lightIng(vPos, vLight.lightIntensity, vLight.diffuseReflectivity, vNormal.xyz, vColor);
+    rtFragCoord = vec4(preColor, 1.0);
+    //rtFragCoord = noiseVec;
 }

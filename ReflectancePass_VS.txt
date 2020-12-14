@@ -1,15 +1,20 @@
-#version 330
-//ReflectancePass
 //Ian Melvin
 uniform mat4 matVP;
 uniform mat4 matGeo;
 
-layout (location = 0) in vec4 pos;
-layout (location = 1) in vec3 normal;
-layout (location = 2) in vec4 uv;
+layout (location = 0) in vec4 aPosition;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexcoord;
+
+uniform mat4 uModelMat, uViewMat, uViewProjMat;
+
 
 out vec4 color;
-out vec4 uv2;
+out vec2 uv;
+out vec4 vNormal;
+out vec4 vTexcoord;
+out vec4 vColor;
+out vec4 vPos;
 
 struct light
 {
@@ -18,7 +23,31 @@ struct light
 	vec3 lightIntensity;
 };
 
+out light vLight;
+
 void main() {
-   uv2 = uv;
-   gl_Position = matVP * matGeo * pos;
+	light lLight;
+	lLight.lightPosition = vec4(0.0, 0.0, 0.0, 0.0);
+	lLight.diffuseReflectivity = vec3(.5, .8, .2);
+	lLight.lightIntensity = vec3(.7, .1, .6);
+	
+	mat4 modelView = uViewMat * uModelMat;
+	vec4 lArr;
+	vec4 eyeCoord;
+	vec3 norm_cam;
+	
+	mat3 normMat = transpose(inverse(mat3(modelView)));
+	norm_cam = normMat * aNormal;
+	eyeCoord = modelView * aPosition;
+	lArr = modelView * lLight.lightPosition;
+
+	
+	vColor = eyeCoord;
+	vNormal = vec4(norm_cam, 1.0);
+	vPos = lArr;
+	
+	vTexcoord = aPosition * 0.5 + 0.5;
+
+   	uv = aTexcoord;
+   	gl_Position = uViewProjMat * uModelMat * aPosition;
 }
