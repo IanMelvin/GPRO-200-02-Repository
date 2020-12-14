@@ -1,7 +1,7 @@
 #version 330
 //ReflectancePass
 //Ian Melvin
-
+//Based on work from labs 7 & 8
 layout (location = 0) out vec4 rtFragCoord;
 
 in vec4 color;
@@ -37,7 +37,7 @@ vec3 lightIng(vec4 light_view, vec3 lInt, vec3 DiffRef, vec3 norm_cam, vec4 eyeC
 void main() {
 	vec4 noiseVec = texture(uTex, vTexcoord.xy);
 	
-	vec3 preColor = vec3(.1, .5, .9) * lightIng(vPos, vLight.lightIntensity, vLight.diffuseReflectivity, vNormal.xyz, vColor);
+	vec3 preColor = noiseVec.xyz * lightIng(vPos, vLight.lightIntensity, vLight.diffuseReflectivity, vNormal.xyz, vColor);
     rtFragCoord = vec4(preColor, 1.0);
     //rtFragCoord = noiseVec;
 }
