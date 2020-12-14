@@ -1,55 +1,18 @@
-#version 300 es
-//Screen Pass
+#version 330
+//Display Pass
 //Ian Melvin
-#ifdef GL_ES
-precision highp float;
-#endif //GL_ES
+//Based on work from lab 8
 
 layout (location = 0) out vec4 rtFragColor;
 
-//Varying
-in vec4 vNormal;
 in vec4 vTexcoord;
-in vec4 vColor;
-in vec4 vPos;
-in vec4 vStandardC;
 
-//Uniforms
-uniform vec4 LightPosition;
-uniform vec3 DiffuseReflectivity;
-uniform vec3 LightIntensity;
 uniform sampler2D uTex;
 
-//Phong shading component
-vec3 lightIng(vec4 light_view, vec3 lInt, vec3 DiffRef, vec3 norm_cam, vec4 eyeCoord)
-{
-	vec3 normDist = normalize(vec3(light_view - eyeCoord));
-	return lInt * DiffRef * max(dot(normDist, norm_cam), 0.0);;
-}
-
-//Based on option determines which colors to use
-void main()
-{
-	int option = 0;
-	
-	//Orange
-	if(option == 0)
-	{
-		rtFragColor = vStandardC;
-	}
-	
-	//Texture
-	else if(option == 1)
-	{
-		vec2 uv = vTexcoord.xy;
-		vec4 color = texture(uTex, uv);
-		rtFragColor = color;
-	}
-	
-	//Phong shading
-	else
-	{
-		vec3 preColor = vTexcoord.xyz * lightIng(vPos, LightIntensity, DiffuseReflectivity, vNormal.xyz, vColor);
-		rtFragColor = vec4(preColor, 1.0);
-	}
+//Outputs results from previous pass with some adjustment for size
+void main() {
+	vec4 ndc = vTexcoord / vTexcoord.w;
+	vec2 uv = ndc.xy * .51 + 0.5;
+	vec4 color = texture(uTex, uv);
+    rtFragColor = color;
 }
