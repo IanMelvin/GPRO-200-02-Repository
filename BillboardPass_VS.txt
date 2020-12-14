@@ -1,0 +1,21 @@
+#version 330 core
+layout (location = 0) in vec4 aPosition;
+//Billboarding Pass
+//Ian Melvin
+//Based of work done at http://www.geeks3d.com/20140815/particle-billboarding-with-the-geometry-shader-glsl/
+in vec4 color;
+
+out VERTEX
+{
+	vec4 vColor;
+} vertex;
+
+uniform mat4 uView;
+uniform mat4 uModel;
+
+void main()
+{
+	mat4 modelViewMat = uView * uModel;
+	gl_Position = modelViewMat * aPosition;
+	vertex.vColor = color;
+}

@@ -1,0 +1,54 @@
+#version 330 core
+//Billboarding Pass
+//Ian Melvin
+//Based of work done at http://www.geeks3d.com/20140815/particle-billboarding-with-the-geometry-shader-glsl/
+
+layout (points) in;
+layout (triangle_strip) out;
+layout (max_vertices = 4) out;
+
+uniform mat4 uProjection;
+uniform float uParticleSize;
+
+in VERTEX
+{
+	vec4 vColor;
+} vertex[];
+
+out vec2 vertex_UV;
+out vec4 vertex_Color;
+
+void main()
+{
+	vec4 p = gl_in[0].gl_Position;
+	
+	// a: left-bottom
+	vec2 va = p.xy + vec2(-0.5, -0.5) * uParticleSize;
+	gl_Position = uProjection * vec4(va, p.zw);
+	vertex_UV = vec2(0.0, 0.0);
+	vertex_Color = vertex[0].vColor;
+	EmitVertex();
+	
+	// b: left-top
+	vec2 vb = p.xy + vec2(-0.5, 0.5) * uParticleSize;
+	gl_Position = uProjection * vec4(vb, p.zw);
+	vertex_UV = vec2(0.0, 1.0);
+	vertex_Color = vertex[0].vColor;
+	EmitVertex();
+	
+	// d: right-bottom
+	vec2 vd = p.xy + vec2(0.5, -0.5) * uParticleSize;
+	gl_Position = uProjection * vec4(vd, p.zw);
+	vertex_UV = vec2(1.0, 0.0);
+	vertex_Color = vertex[0].vColor;
+	EmitVertex();
+	
+	// c: right-top
+	vec2 vc = p.xy + vec2(0.5, 0.5) * uParticleSize;
+	gl_Position = uProjection * vec4(vc, p.zw);
+	vertex_UV = vec2(1.0, 1.0);
+	vertex_Color = vertex[0].vColor;
+	EmitVertex();
+	
+	EndPrimitive();
+}

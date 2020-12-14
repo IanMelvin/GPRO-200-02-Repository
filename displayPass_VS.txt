@@ -1,33 +1,45 @@
 #version 300 es
-//Luminance Pass
+//Screen Pass
 //Ian Melvin
-#ifdef GL_ES
-precision highp float;
-#endif //GL_ES
+layout (location = 0) in vec4 aPosition;
+layout (location = 1) in vec3 aNormal;
 
-layout (location = 0) out vec4 rtFragColor;
+//Varying
+out vec4 vStandardC;
+out vec4 vNormal;
+out vec4 vTexcoord;
+out vec4 vColor;
+out vec4 vPos;
 
-in vec4 vTexcoord;
+//Uniforms
+uniform mat4 uModelMat, uViewMat, uProjMat;
+uniform vec4 LightPosition;
+uniform vec3 DiffuseReflectivity;
+uniform vec3 LightIntensity;
 
-uniform sampler2D uTex;
-uniform vec2 uResolution;
-
-//Based on work from Lab 6
-//Calcs luminance of color
-float luminance(vec3 color)
-{
-	return 0.2126 * color.x + 0.7152 * color.y + 0.0722 * color.z;
-}
-
-//Based on work from Lab 6
-//Process fragments
+//Based on work from Lab 7
+//Declares and passes the values needed to make the 
+//color for the geometry to the PS using varying
 void main()
 {
-	float lumThreshHold = 0.75, invLumThresh = 1.0 / (1.0 - lumThreshHold);
+	mat4 modelViewMat = uViewMat * uModelMat;
+	vec4 lArr;
+	vec4 eyeCoord;
+	vec3 norm_cam;
 	
-	//Luminance
-	vec4 image = texture(uTex, vTexcoord.xy);
-	vec4 color = image * clamp(luminance(image.xyz) - lumThreshHold, 0.0, 1.0) * invLumThresh;
+	//View Space
+	mat3 normalMat = transpose(inverse(mat3(modelViewMat)));
+	norm_cam = normalMat * aNormal;
+	eyeCoord = modelViewMat * aPosition;	
+	lArr = modelViewMat * LightPosition;
+
+	gl_Position = uProjMat * uViewMat * uModelMat * aPosition;
 	
-	rtFragColor = color;
+	vStandardC = vec4(1.0, 0.5, 0.0, 1.0);
+	vTexcoord = aPosition * 0.5 + 0.5;
+	
+	//Per-fragment
+	vColor = eyeCoord;
+	vNormal = vec4(norm_cam,1.0);
+	vPos = lArr;
 }
