@@ -5,14 +5,15 @@
 
 layout (location = 0) out vec4 rtFragColor;
 
-uniform sampler2D uTex;
-
+//Varying
 in vec2 vertex_UV;
 in vec4 vertex_Color;
 out vec4 FragColor;
 
-uniform sampler2D uTexmap;
+//Uniforms
+uniform sampler2D uTex;
 
+//Calculates the uv, pulls in texture values modifies them from the geometry shader and outputs them
 void main()
 {
 	vec2 uv = vertex_UV.xy;

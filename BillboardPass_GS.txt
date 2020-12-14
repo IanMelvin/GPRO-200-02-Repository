@@ -7,12 +7,14 @@ layout (points) in;
 layout (triangle_strip) out;
 layout (max_vertices = 4) out;
 
+//Uniforms
 uniform mat4 uProjection;
 uniform mat4 uViewProjMat;
 uniform mat4 uModel;
 uniform mat4 uView;
 uniform float uParticleSize;
 
+//Varying
 in VERTEX
 {
 	vec4 vColor;
@@ -21,6 +23,7 @@ in VERTEX
 out vec2 vertex_UV;
 out vec4 vertex_Color;
 
+//Calculates the values for each vertex in the Primitive
 void main()
 {
 	mat4 MV = uView * uModel;
